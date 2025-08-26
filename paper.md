@@ -25,6 +25,9 @@ In this context, effective visualization plays a crucial role by providing an ac
 Currently, there are no (**DOUBLE CHECK**) widely available graphical user interfaces (GUIs) designed specifically for the interactive exploration and analysis of temporal graphs. This presents a significant barrier, particularly in fields such as biology and the social sciences, where temporal networks are commonly encountered. 
 Researchers in these domains often lack extensive programming experience, making it difficult for them to use existing tools, which are typically code-based and require specialized technical knowledge. As a result, valuable insights can remain inaccessible without more user-friendly, visual approaches to temporal graph analysis.
 
+# Key features
+Showcase the key features of the GUI
+
 # Related software
 cite existing softwares and GUI for graph visualization
 
