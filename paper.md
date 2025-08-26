@@ -28,7 +28,7 @@ Researchers in these domains often lack extensive programming experience, making
 # key references
 cite existing softwares and GUI for graph visualization
 
-# Representative research / Practical application / Research application showcase
+# Representative research / Practical application / Research application / scientific application
 Cite sRC paper here, and show how we can observe the sRC with the GUI.
 Figures can be included like this:
 ![Caption for example figure.\label{fig:example}](figure.png)
