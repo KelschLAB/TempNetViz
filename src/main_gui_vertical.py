@@ -17,8 +17,14 @@ import os
 from read_graph import *
 from clustering_window import *
 from settings_window import settingsWindow
+import threading
+import gc
 
 #To-do: 
+#       - Implement animation
+#       - Give possibilites to select whole folder at once, not to have to click on every single file which is super unpractical.
+#       - Set a default percentage_threshold value that depends on the number of nodes. 
+
 #       - what does it mean to be neighbors in terms of chasing?? (directed interaction). Rich club coloring does not seem to work
 #           properly in these cases. It only colors nodes that have outgoing edges.
 #       - setting: stacked histogram and side by side are inverted.
@@ -232,6 +238,12 @@ class App:
         for fm in self.content_frame.winfo_children():
             fm.destroy()
             root.update()
+            
+        # Show temporary "Loading..." label before plotting
+        self.label = ttk.Label(self.content_frame, text="Rendering graph...", font = 'Helvetica 20 bold')
+        self.label.place(relx=0.3, rely=0.2, relwidth=0.8, relheight=0.4)
+        self.content_frame.update()
+                
         px = 1/plt.rcParams['figure.dpi']  # pixel in inches
         f = Figure(figsize=(950*px,500*px))
         if len(self.path_to_file) > 1 and self.view_type == "3D":
@@ -314,16 +326,20 @@ class App:
             else:
                 self.stats_in_frame()
             return
+        
         self.new_window = tk.Toplevel(root)
         self.new_window.title("Enter Parameter Value")
         tk.Label(self.new_window, text="Enter " + self.graphcut_selector.get()).grid(row=0,column=0)
         self.graphcut_entry = tk.Entry(self.new_window)
         self.graphcut_entry.grid(row=1,column=0)
         if self.graphcut_selector.get() == "threshold":
+            self.graphcut_entry.insert(0, str(self.percentage_threshold))
             tk.Label(self.new_window, text="%").grid(row=1,column=1)
-        elif self.graphcut_selector.get() == "Mutual nearest neighbors":
-            tk.Label(self.new_window, text="Neighbours").pack()
+        elif self.graphcut_selector.get() == "mutual nearest neighbors" or self.graphcut_selector.get() == "nearest neighbors":
+            mnn = str(self.mnn_number) if self.mnn_number is not None else ""
+            self.graphcut_entry.insert(0, mnn)
         tk.Button(self.new_window, text="Cut!", command=self.graph_cut_changed).grid(row=2,column=0)
+        tk.Label(self.new_window, text="Enter " + self.graphcut_selector.get()).grid(row=0,column=0)
 
     def graph_cut_changed(self):
         if self.graphcut_selector.get() == "threshold":

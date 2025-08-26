@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 import igraph as ig
 from copy import deepcopy
 from matplotlib.cm import ScalarMappable, get_cmap
@@ -14,6 +15,8 @@ from tkinter import messagebox as mb
 from clustering_algorithm import *
 from multilayer_plot import *
 import pandas as pd
+import time 
+
 
 def isSymmetric(mat):
     transmat = np.array(mat).transpose()
@@ -439,14 +442,12 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
         
     # default values
     node_color = "gray"
-    default_node_size = kwargs["node_size"] if "node_size" in kwargs else 15
+    node_size = kwargs["node_size"] if "node_size" in kwargs else 15
     default_edge_width = kwargs["edge_width"] if "edge_width" in kwargs else 5
 
     # cmap1 = cm.Reds
     cmap1 = cm.Grays
     if "node_metric" in kwargs:
-        if kwargs["node_metric"] == "none":
-            node_size = default_node_size
         if kwargs["node_metric"] == "betweenness":
             edge_betweenness = g.betweenness(weights = [1/e['weight'] for e in g.es()]) #taking the inverse of edge values as we want high score to represent low distances
             edge_betweenness = ig.rescale(edge_betweenness)
@@ -892,11 +893,15 @@ def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn =
         
 if __name__ == '__main__':
 
-    path = "..\\data\\social network matrices 3days\\G5\\"
-    file1 = "approaches_resD3_1.csv"
-    file2 = "approaches_resD3_2.csv"
-    file3 = "approaches_resD3_3.csv"
-    file4 = "interactions_resD3_2.csv"
+    # path = "..\\data\\social network matrices 3days\\G5\\"
+    # file1 = "approaches_resD3_1.csv"
+    # file2 = "approaches_resD3_2.csv"
+    # file3 = "approaches_resD3_3.csv"
+    # file4 = "interactions_resD3_2.csv"
+    
+    path = "..\\data\\random_graph\\"
+    file1 = "rand_graph0.csv"
+    file2 = "rand_graph1.csv"
 
     data = read_graph([path+file1], mnn = 3, return_ig=False)[0]
     if isSymmetric(data):
@@ -906,9 +911,14 @@ if __name__ == '__main__':
     
     # c = community_clustering(path+file)
     # f = plt.Figure()
+    t1 = time.time()
     fig, ax = plt.subplots(1, 1)
-    # ax = fig.add_subplot(111, projection='3d')
-    display_graph([path+file4], ax, mnn = 4, deg = 2, node_metric = "k-core", mutual = True, idx = [], cluster_num = None)
+    ax = fig.add_subplot(111, projection='3d')
+    display_graph([path+file1, path+file2], ax, mnn = None, deg = 0, percentage_threshold = 50,
+                  node_metric = "k-core", mutual = True, idx = [], node_size = 5, edge_width = 2,
+                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None)
+    t2 = time.time()
+    print(t2-t1)
     # plt.show()
     # c = display_stats([path+file1, path+file2, path+file3], ax = ax, mnn = 4, node_metric = "rich-club", deg = 2)
     # g = read_graph(path+file, return_ig=True)
