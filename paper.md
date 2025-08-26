@@ -30,6 +30,7 @@ Showcase the key features of the GUI
 
 # Related software
 cite existing softwares and GUI for graph visualization
+ [@igraph] 
 
 # Research application
 Cite sRC paper here, and show how we can observe the sRC with the GUI.
