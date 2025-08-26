@@ -31,7 +31,7 @@ Showcase the key features of the GUI
 # Related software
 cite existing softwares and GUI for graph visualization
 
-# Representative research / Practical application / Research application / scientific application
+# Research application
 Cite sRC paper here, and show how we can observe the sRC with the GUI.
 Figures can be included like this:
 ![Caption for example figure.\label{fig:example}](figure.png)
@@ -39,8 +39,6 @@ and referenced from text using \autoref{fig:example}.
 
 Figure sizes can be customized by adding an optional second parameter:
 ![Caption for example figure.](figure.png){ width=20% }
-
-# Citations
 
 # Acknowledgements
 
