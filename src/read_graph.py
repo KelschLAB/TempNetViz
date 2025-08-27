@@ -14,6 +14,7 @@ from warnings import warn
 from tkinter import messagebox as mb
 from clustering_algorithm import *
 from multilayer_plot import *
+from graph_animation import *
 import pandas as pd
 import time 
 
@@ -888,7 +889,123 @@ def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn =
     else:
         ax.set_xlabel("Edge values")
         ax.set_title("No 'node metric' was selected, showing edge values.")
-
+        
+def display_animation(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affinity = True, rm_fb_loops = True, mutual = True, **kwargs):
+    layers_layout = read_graph(path_to_file, percentage_threshold = 0, mnn = None, return_ig=True, affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual) #here to make sure layout stays consistent upon graph cut
+    layers = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=True, affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual) 
+    layers_data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=False, affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual)
+    
+    default_node_size = kwargs["node_size"] if "node_size" in kwargs else 15
+    default_edge_width = kwargs["edge_width"] if "edge_width" in kwargs else 5
+    node_color = "red"
+    node_size = []
+    for g in layers:
+        size = np.array([default_node_size for v in range(g.vcount())])
+        node_size.append(size)
+        
+    if "node_metric" in kwargs:
+        if kwargs["node_metric"] == "none":
+            node_size = []
+            for g in layers:
+                size = np.array([default_node_size for v in range(g.vcount())])
+                node_size.append(size)
+                
+        elif kwargs["node_metric"] == "betweenness":
+            node_size = []
+            for g in layers:
+                edge_betweenness = g.betweenness(weights = [1/(e['weight']) for e in g.es()]) #taking the inverse of edge values as we want high score to represent low distances
+                edge_betweenness = ig.rescale(edge_betweenness)
+                node_size.append(np.array(edge_betweenness)*default_node_size+0.07)
+        elif kwargs["node_metric"] == "strength":
+            node_size = []
+            for g in layers:
+                edge_strength = g.strength(weights = [e['weight'] for e in g.es()])
+                edge_strength = ig.rescale(edge_strength)
+                node_size.append(np.array(edge_strength)*default_node_size+0.07)
+        elif kwargs["node_metric"] == "closeness":
+            node_size = []
+            for g in layers:
+                edge_closeness = g.closeness(weights = [1/(e['weight']) for e in g.es()]) #taking the inverse of edge values as we want high score to represent low distances
+                edge_closeness = ig.rescale(edge_closeness)
+                node_size.append(np.array(edge_closeness)*default_node_size+0.07)
+        elif kwargs["node_metric"] == "hub score":
+            node_size = []
+            for g in layers:
+                edge_hub = g.hub_score(weights = [e['weight'] for e in g.es()])
+                edge_hub = ig.rescale(edge_hub)
+                node_size.append(np.array(edge_hub)*default_node_size+0.07)
+        elif kwargs["node_metric"] == "authority score":
+            node_size = []
+            for g in layers:
+                edge_authority = g.authority_score(weights = [e['weight'] for e in g.es()])
+                edge_authority = ig.rescale(edge_authority)
+                node_size.append(np.array(edge_authority)*default_node_size+0.07)
+        elif kwargs["node_metric"] == "eigenvector centrality":
+            node_size = []
+            for g in layers:
+                edge_evc = g.eigenvector_centrality(weights = [e['weight'] for e in g.es()])
+                edge_evc = ig.rescale(edge_evc)
+                node_size.append(np.array(edge_evc)*default_node_size+0.07)
+        elif kwargs["node_metric"] == "page rank":
+            node_size = []
+            for g in layers:
+                edge_pagerank = g.personalized_pagerank(weights = [e['weight'] for e in g.es()])
+                edge_pagerank = ig.rescale(edge_pagerank)
+                node_size.append(np.array(edge_pagerank)*default_node_size+0.07)
+        elif kwargs["node_metric"] == "rich-club":
+            node_size = []
+            for g in layers:
+                k_degree = kwargs["deg"]
+                size = rich_club_weights(g, k_degree, 0.01)
+                node_size.append(np.array([n*default_node_size for n in size]))
+        elif kwargs["node_metric"] == "k-core":
+            node_size = []
+            for d in layers_data:
+                k_degree = kwargs["deg"]
+                size = k_core_weights(d, k_degree, 0.01)
+                node_size.append(np.array([n*default_node_size for n in size]))
+        
+    if "idx" in kwargs:
+        if len(kwargs["idx"]) == 0:
+            marker_frame_color = None
+        else:
+            color_num = len(np.unique(kwargs["idx"]))
+            cmap = get_cmap('Spectral')
+            palette = ClusterColoringPalette(color_num)
+            marker_frame_color = [palette[i] for i in kwargs["idx"]]#cmap(kwargs["idx"])
+    else:
+        marker_frame_color = None
+    
+    if "layout" in kwargs:
+        layout_style = kwargs["layout"]
+    else:
+        layout_style = "fr"
+        
+    if "node_labels" in kwargs:
+        node_labels = kwargs["node_labels"]
+    else:
+        node_labels = None
+        
+    if "layer_labels" in kwargs:
+        layer_labels = kwargs["layer_labels"]
+    else:
+        layer_labels = None
+    
+    styles = []
+    for i in range(len(layers)):
+        visual_style = {}
+        visual_style["vertex_size"] = node_size[i]
+        # visual_style["vertex_color"] = node_color[i]
+        # visual_style["vertex_frame_color"] = marker_frame_color[i]
+        visual_style["edge_arrow_width"] = rescale(np.array([w['weight'] for w in layers[i].es]), default_edge_width)*(default_edge_width)
+        
+        if "scale_edge_width" in kwargs and type(kwargs["scale_edge_width"]) == bool:
+            g_edge_width = rescale(np.array([e['weight'] for e in layers[i].es()]), default_edge_width)
+            visual_style["edge_width"] = g_edge_width
+        styles.append(visual_style)
+        
+    layout = layers[0].layout(layout_style)
+    animation = GraphAnimator(layers, layout, styles, ax)
         
         
 if __name__ == '__main__':
@@ -900,8 +1017,11 @@ if __name__ == '__main__':
     # file4 = "interactions_resD3_2.csv"
     
     path = "..\\data\\random_graph\\"
-    file1 = "rand_graph0.csv"
-    file2 = "rand_graph1.csv"
+    file1 = "rand_graph1.csv"
+    file2 = "rand_graph2.csv"
+    file3 = "rand_graph3.csv"
+    file4 = "rand_graph4.csv"
+    file5 = "rand_graph5.csv"
 
     data = read_graph([path+file1], mnn = 3, return_ig=False)[0]
     if isSymmetric(data):
@@ -911,14 +1031,20 @@ if __name__ == '__main__':
     
     # c = community_clustering(path+file)
     # f = plt.Figure()
-    t1 = time.time()
+    # fig, ax = plt.subplots(1, 1)
+    # ax = fig.add_subplot(111, projection='3d')
+    # display_graph([path+file1, path+file2], ax, mnn = None, deg = 0, percentage_threshold = 50,
+    #               node_metric = "k-core", mutual = True, idx = [], node_size = 5, edge_width = 2,
+    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None)
     fig, ax = plt.subplots(1, 1)
-    ax = fig.add_subplot(111, projection='3d')
-    display_graph([path+file1, path+file2], ax, mnn = None, deg = 0, percentage_threshold = 50,
+    t1 = time.time()
+    display_animation([path+file1, path+file2, path+file3, path+file4], ax, mnn = None, deg = 0, 
+                      percentage_threshold = 50,
                   node_metric = "k-core", mutual = True, idx = [], node_size = 5, edge_width = 2,
                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None)
     t2 = time.time()
-    print(t2-t1)
+    print(t2 - t1)
+    
     # plt.show()
     # c = display_stats([path+file1, path+file2, path+file3], ax = ax, mnn = 4, node_metric = "rich-club", deg = 2)
     # g = read_graph(path+file, return_ig=True)
