@@ -18,7 +18,6 @@ from graph_animation import *
 import pandas as pd
 import time 
 
-
 def isSymmetric(mat):
     transmat = np.array(mat).transpose()
     if np.array_equal(mat, transmat):
@@ -1006,7 +1005,7 @@ def display_animation(path_to_file, ax, percentage_threshold = 0.0, mnn = None, 
         
     layout = layers[0].layout(layout_style)
     animation = GraphAnimator(layers, layout, styles, ax)
-        
+    return animation.slider
         
 if __name__ == '__main__':
 

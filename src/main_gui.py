@@ -25,6 +25,7 @@ import gc
 #       - Give possibilites to select whole folder at once, not to have to click on every single file which is super unpractical.
 #       - Set a default percentage_threshold value that depends on the number of nodes. 
 #       - give possibility to display names or not
+#       - Remove spectral clustering? Fix community detection!
 
 #       - what does it mean to be neighbors in terms of chasing?? (directed interaction). Rich club coloring does not seem to work
 #           properly in these cases. It only colors nodes that have outgoing edges.
@@ -184,7 +185,7 @@ class App:
         self.anim_btn["command"] = self.animation_clicked
         self.plot_btn.config(bg="#d1d1d1")
         self.stats_btn.config(bg="#f0f0f0")
-        self.anim_button.config(bg="#f0f0f0")
+        self.anim_btn.config(bg="#f0f0f0")
         
         # Starting instructions label
         self.label = tk.Label(self.content_frame, font = 'Helvetica 13 bold', 
@@ -302,7 +303,25 @@ class App:
        # self.label.config(text="")
        
     def animation_in_frame(self):
-      pass    
+        for fm in self.content_frame.winfo_children():
+            fm.destroy()
+            root.update()
+        px = 1/plt.rcParams['figure.dpi']  # pixel in inches
+        f = Figure(figsize=(800*px,400*px), dpi = 100)
+        a = f.add_subplot(111)
+        canvas = FigureCanvasTkAgg(f, master=self.content_frame)
+        NavigationToolbar2Tk(canvas, self.content_frame)
+        canvas.get_tk_widget().pack()#fill=tk.BOTH, expand=True, side="top") 
+
+        slider = display_animation(self.path_to_file, a, percentage_threshold = self.percentage_threshold, mnn = self.mnn_number, mutual = self.mutual, \
+                      avg_graph = self.view_type == "avg", affinity = self.edge_type == "affinity",  rm_fb_loops = self.remove_loops, \
+                      layout = self.layout_style, node_metric = self.node_metric, \
+                      idx = self.idx, cluster_num = self.cluster_num, layer_labels=self.path_to_file, deg = self.degree,
+                      edge_width = int(self.edge_thickness_var.get()), node_size = int(self.node_thickness_var.get()), 
+                      scale_edge_width = self.scale_edge_width, between_layer_edges = self.between_layer_edges)
+        self.anim_slider = slider
+
+        canvas.draw()
 
     # function for graph selection and display
     def get_checked(self):
@@ -332,8 +351,10 @@ class App:
             self.mnn_number = None
             if self.display_type == "plot":
                 self.plot_in_frame()
-            else:
+            elif self.display_type == "stats":
                 self.stats_in_frame()
+            elif self.display_type == "animation":
+                self.animation_in_frame()
             return
         
         self.new_window = tk.Toplevel(root)
@@ -366,8 +387,10 @@ class App:
         self.new_window.destroy()
         if self.display_type == "plot":
             self.plot_in_frame()
-        else:
+        elif self.display_type == "stats":
             self.stats_in_frame()
+        elif self.display_type == "animation":
+            self.animation_in_frame()
         
     def plot_clicked(self):
         self.display_type = "plot"
@@ -388,7 +411,7 @@ class App:
         self.animation_in_frame()
         self.plot_btn.config(bg="#f0f0f0")
         self.stats_btn.config(bg="#f0f0f0")
-        self.anim_btn.congif(bg="#d1d1d1")
+        self.anim_btn.config(bg="#d1d1d1")
         
     def plot_changed(self, event):
         self.layout_style = self.plot_selector.get()
@@ -429,8 +452,10 @@ class App:
             
         if self.display_type == "plot":
             self.plot_in_frame()
-        else:
+        elif self.display_type == "stats":
             self.stats_in_frame()
+        elif self.display_type == "animation":
+            self.animation_in_frame()
 
     def cluster_button_command(self):
         self.clustertype_wdw = tk.Toplevel(root)

@@ -89,4 +89,5 @@ class GraphAnimator:
             self.animation.event_source.stop()
             self.is_playing = False
     
+
  
