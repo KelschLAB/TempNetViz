@@ -17,18 +17,16 @@ import os
 from read_graph import *
 from clustering_window import *
 from settings_window import settingsWindow
-
+from listbox_selection import MultiSelectDropdown
 import threading
 import gc
 
 #To-do: 
-#       - Implement animation
-#       - Give possibilites to select whole folder at once, not to have to click on every single file which is super unpractical.
-#       - Set a default percentage_threshold value that depends on the number of nodes. 
 #       - give possibility to display names or not
 #       - Remove spectral clustering? Fix community detection!
-#       - Fix settings that get clicked when hovering mouse over it...
 
+
+#       - Set a default percentage_threshold value that depends on the number of nodes. 
 #       - what does it mean to be neighbors in terms of chasing?? (directed interaction). Rich club coloring does not seem to work
 #           properly in these cases. It only colors nodes that have outgoing edges.
 #       - setting: stacked histogram and side by side are inverted.
@@ -77,11 +75,10 @@ class App:
         self.view_type = "3D"
         self.histo_type = "stacked"
         self.remove_loops = True # for the app to know if feedback loops should be plotted or not 
-        self.edge_type_var = tk.IntVar(value = 1) # variable for changing affinity/distance in settings window
-        self.view_var = tk.IntVar(value = 1)      # variable for changing view from 3D to average in settings window
-        self.loops_var = tk.IntVar(value = 1)     # variable for the removal of feedback loops in graph display
         self.edge_thickness_var = tk.StringVar(value = "5") # variable for changing edge type in settings window
         self.node_thickness_var = tk.StringVar(value = "15") # variable for changing edge type in settings window
+        self.animation_speed_var = tk.StringVar(value = "200") # variable for changing the speed of animation
+        self.show_histogram_legend = True
         self.scale_edge_width = True # variable for scaling the thickness of edge to their value
         self.between_layer_edges = True
 
@@ -116,36 +113,30 @@ class App:
         settings_button.menu.add_command(label="Reset",command = self.reset)
         link = "https://stackoverflow.com/questions/71458060/how-to-open-a-link-with-an-specific-button-tkinter" #link to docs
         settings_button.menu.add_command(label="Help", command =lambda: webbrowser.open(link))
-    #    settings_button["justify"] = "center"
         settings_button.place(relx=0.53,rely = 0.5, relwidth=0.43, relheight=0.35)
         
-        # Graph file(s) selection Menubutton
+        # Folder selection Menubutton
         analysis_label = tk.Label(btn_frame, text = "Data analysis", font = 'Helvetica 12 bold', bg = self.color2)
         analysis_label.place(relx = 0.1, rely = 0.05, relwidth=0.8)
         origin, distance_between = 0.15, 0.15
         padx, pady, font = 0, 30, '5'
         graph_selector_label = tk.Label(btn_frame, text = "Sub-graph:", bg = self.color2)
         graph_selector_label.place(relx= 0.07, rely = origin, relwidth=0.25, relheight=0.08)
-        self.graph_selector=ttk.Menubutton(btn_frame, text = "Select graph file(s)")
-        self.graph_selector.place(relx= 0.34, rely = origin, relwidth=0.57, relheight=0.08)
-
-        # self.graph_selector.grid(row = 0, column = 1, padx = padx, pady = pady)
-        # self.graph_selector.pack(side="left", fill="x", padx = 5)
+        
+        # Graph file(s) selection menu
+        self.graph_selector = MultiSelectDropdown(btn_frame, [], 
+            button_text="Select graph file(s)", apply_callback=self.get_checked)
+        self.graph_selector.button.place(relx=0.34, rely=origin, relwidth=0.57, relheight=0.08)
         self.path_variable_list = [] # storing the menu options here
         self.path_label_list = []
         self.active_path_list = [] # storing selected paths here
-        # self.graph_selector.set("Graph file")
-        self.graph_selector.bind('<<ComboboxSelected>>', self.get_checked)
 
         # layout selection
         layout_label = tk.Label(btn_frame, text = "Layout: ", bg = self.color2)
         layout_label.place(relx=0.12, rely = origin+distance_between, relheight=0.06)
         layout_list = ["circle", "drl", "fr", "kk", "large", "random", "tree"]
         self.plot_selector=ttk.Combobox(btn_frame, values = layout_list, state = "readonly")
-        # self.plot_selector.pack(side="left", fill="x", padx = 5)
-        # self.plot_selector.grid(row = 1, column = 1, pady = pady)
         self.plot_selector.place(relx=0.35, rely = origin+distance_between, relheight=0.06)
-
         self.plot_selector.set("Graph layout")
         self.plot_selector.bind('<<ComboboxSelected>>', self.plot_changed)
 
@@ -189,29 +180,40 @@ class App:
         self.anim_btn.config(bg="#f0f0f0")
         
         # Starting instructions label
+        txt = "------------------------------------- QUICKSTART --------------------------------------------\n\n"
+        txt += "1. Select the directory/folder where your files are stored with the  'Open'  button.\n"
+        txt += "\n2. Then, select the graph file(s) with the 'sub-graph' drop-down menu to start plotting.\n"
+        txt += "      You can select files by dragging the mouse, or by holding ctrl and clicking.\n\n"
+        txt += "3. Change the representation with the layout and metric buttons. If you are working with \n"
+        txt += "      large graphs, apply a graph cut to remove weak edges and improve visibility.\n\n"
+        txt += "4. You can switch the result display with the 'plot', 'statistics' and animation buttons"
         self.label = tk.Label(self.content_frame, font = 'Helvetica 13 bold', 
-                              text ="1. Select the directory/folder where your files are stored with the  'Open'  button. \n 2. Then, select the graph file(s) with the 'sub-graph' drop-down menu to start plotting.\n 3. You can switch the result display with the 'plot' and 'statistics' buttons")
-        self.label.place(relx=0.1, rely=0.2, relwidth=0.8, relheight=0.4)
+                              text = txt)
+        self.label.place(relx=0.1, rely=0.2, relwidth=0.8, relheight=0.5)
         
-    # functions for 'file' menu 
+    # functions for folder selection
     def load_button_command(self):
         """ Selects the directory/folder path where graph layers are contained, and updates the list of selectable graph layer """
         self.dirpath = filedialog.askdirectory(title="Select the directory/folder which contains the graph file(s)")
-        menu = tk.Menu(self.graph_selector, tearoff=False)
         self.path_variable_list = []
         self.path_label_list = []
-        # main list holding menu values
         path_list = [p for p in os.listdir(self.dirpath) if p.endswith(".csv")]
+        self.path_list = path_list
+        self.graph_selector.choices = self.path_list
+        self.graph_selector.refresh_listbox()
                 
-        # Creating variables to store paths dynamically
-        for i in range(0, len(path_list)):
-            globals()['var'+str(i)] = tk.StringVar(self.graph_selector)
-        # Finally adding values to the actual Menubutton
-        for i in range(0, len(path_list)):
-            self.path_variable_list.append(globals()['var'+str(i)])
-            self.path_label_list.append(path_list[i])
-            menu.add_checkbutton(label = self.path_label_list[i], variable = self.path_variable_list[i], command=self.get_checked)
-        self.graph_selector.configure(menu=menu)
+    # function for graph selection and display
+    def get_checked(self):
+        """ Updates list of paths when graph layer selector is clicked """
+        lst = [self.graph_selector.listbox.get(i) for i in self.graph_selector.listbox.curselection()]
+        self.active_path_list = lst
+        self.path_to_file = [self.dirpath + "/" + self.active_path_list[i] for i in range(len(self.active_path_list))]   
+        if self.display_type == "plot":
+            self.plot_in_frame()
+        elif self.display_type == "stats":
+            self.stats_in_frame()
+        elif self.display_type == "animation":
+            self.animation_in_frame()
 
     def reset(self):
         """
@@ -239,10 +241,12 @@ class App:
         B2.pack(side="left")
         
     def settings_window(self):
-        settings_menu = settingsWindow(root, self) # creates a settings window
+        settingsWindow(root, self) # creates a settings window
          
     # central function for plotting the graph(s)
     def plot_in_frame(self):
+        if len(self.active_path_list) == 0:
+            return
         for fm in self.content_frame.winfo_children():
             fm.destroy()
             root.update()
@@ -286,6 +290,8 @@ class App:
         
     # central function for displaying the statistics of the graph(s)
     def stats_in_frame(self):
+        if len(self.active_path_list) == 0:
+            return
         for fm in self.content_frame.winfo_children():
             fm.destroy()
             root.update()
@@ -295,40 +301,27 @@ class App:
         display_stats(self.path_to_file, a, percentage_threshold=self.percentage_threshold, 
                       affinity = self.edge_type == "affinity", mnn = self.mnn_number, mutual = self.mutual, 
                       node_metric = self.node_metric, avg_graph = self.view_type == "avg",
-                      stacked = self.histo_type == "stacked", deg = self.degree)
-    
+                      stacked = self.histo_type == "stacked", deg = self.degree, show_legend = self.show_histogram_legend)
+        
         canvas = FigureCanvasTkAgg(f, master=self.content_frame)
         NavigationToolbar2Tk(canvas, self.content_frame)
         canvas.draw()
         canvas.get_tk_widget().pack()#fill=tk.BOTH, expand=True, side="top") 
-       # self.label.config(text="")
        
     def animation_in_frame(self):
+        if len(self.active_path_list) == 0:
+            return
         for fm in self.content_frame.winfo_children():
             fm.destroy()
             root.update()
 
-        display_animation(self.path_to_file, self.content_frame, percentage_threshold = self.percentage_threshold, mnn = self.mnn_number, mutual = self.mutual, \
-                      avg_graph = self.view_type == "avg", affinity = self.edge_type == "affinity",  rm_fb_loops = self.remove_loops, \
-                      layout = self.layout_style, node_metric = self.node_metric, \
+        display_animation(self.path_to_file, self.content_frame, percentage_threshold = self.percentage_threshold, mnn = self.mnn_number,
+                      mutual = self.mutual, avg_graph = self.view_type == "avg", affinity = self.edge_type == "affinity",
+                      rm_fb_loops = self.remove_loops, layout = self.layout_style, node_metric = self.node_metric, 
                       idx = self.idx, cluster_num = self.cluster_num, layer_labels=self.path_to_file, deg = self.degree,
                       edge_width = int(self.edge_thickness_var.get()), node_size = int(self.node_thickness_var.get()), 
-                      scale_edge_width = self.scale_edge_width, between_layer_edges = self.between_layer_edges)
-        # canvas = FigureCanvasTkAgg(f, master=self.content_frame)
-        # # NavigationToolbar2Tk(canvas, self.content_frame)
-        # canvas.get_tk_widget().pack()#fill=tk.BOTH, expand=True, side="top") 
-        # canvas.draw()
-
-    # function for graph selection and display
-    def get_checked(self):
-        """ Updates list of paths when graph layer selector is clicked """
-        lst = []
-        for i, item in enumerate(self.path_variable_list):
-            if item.get() == "1":
-                lst.append(self.path_label_list[i])
-        self.active_path_list = lst
-        self.path_to_file = [self.dirpath + "/" + self.active_path_list[i] for i in range(len(self.active_path_list))]   
-        self.plot_in_frame()
+                      scale_edge_width = self.scale_edge_width, between_layer_edges = self.between_layer_edges, 
+                      interframe = int(self.animation_speed_var.get()))
 
     def graphcut_param_window(self, event):
         """
@@ -393,14 +386,14 @@ class App:
         self.plot_in_frame()
         self.plot_btn.config(bg="#d1d1d1")
         self.stats_btn.config(bg="#f0f0f0")
-        self.anim_btn.congif(bg="#f0f0f0")
+        self.anim_btn.config(bg="#f0f0f0")
 
     def stats_clicked(self):
         self.display_type = "stats"
         self.stats_in_frame()
         self.plot_btn.config(bg="#f0f0f0")
         self.stats_btn.config(bg="#d1d1d1")
-        self.anim_btn.congif(bg="#f0f0f0")
+        self.anim_btn.config(bg="#f0f0f0")
         
     def animation_clicked(self):
         self.display_type = "animation"
@@ -408,11 +401,16 @@ class App:
         self.plot_btn.config(bg="#f0f0f0")
         self.stats_btn.config(bg="#f0f0f0")
         self.anim_btn.config(bg="#d1d1d1")
-        
+    
+    # layout type changed
     def plot_changed(self, event):
         self.layout_style = self.plot_selector.get()
         if self.display_type == "plot":
             self.plot_in_frame()
+        elif self.display_type == "stats":
+            self.stats_in_frame()
+        elif self.display_type == "animation":
+            self.animation_in_frame()
 
     def rich_club_window(self):
         self.new_window = tk.Toplevel(root)

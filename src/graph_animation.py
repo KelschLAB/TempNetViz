@@ -11,12 +11,13 @@ import tkinter.font as tkFont
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class GraphAnimator:
-    def __init__(self, graphs, layout, styles, parent_frame = None):
+    def __init__(self, graphs, layout, styles, parent_frame = None, interframe_time = 200):
         self.graphs = graphs
         self.layout = layout
         self.styles = styles # store all the layout information, node sizes, edges width etc...
         self.is_playing = False
         self.animation = None
+        self.interframe = interframe_time
         self.current_frame = 0
         if parent_frame is None:
             self.root = tk.Tk()
@@ -43,7 +44,7 @@ class GraphAnimator:
             
         # Animation frame 
         self.anim_frame = tk.Frame(self.parent_frame)
-        self.anim_frame.place(relx= 0.0, rely = 0.0, relwidth=1, relheight=0.80)
+        self.anim_frame.place(relx= 0.0, rely = 0.0, relwidth=1, relheight=0.90)
         
         # make canvas
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.anim_frame)
@@ -52,7 +53,7 @@ class GraphAnimator:
         
         # control frame to put widgets in
         self.control_frame = tk.Frame(self.parent_frame)
-        self.control_frame.place(relx= 0.0, rely = 0.8, relwidth=0.8, relheight=0.15)
+        self.control_frame.place(relx= 0.1, rely = 0.92, relwidth=0.7, relheight=0.10)
 
         # Create slider
         slider_label = tk.Label(self.control_frame, text="Frame:")
@@ -66,7 +67,7 @@ class GraphAnimator:
         
         # Create buttons
         self.button_frame = tk.Frame(self.parent_frame)
-        self.button_frame.place(relx= 0.8, rely = 0.8, relwidth=0.2, relheight=0.15)
+        self.button_frame.place(relx= 0.8, rely = 0.92, relwidth=0.2, relheight=0.10)
         self.play_button = tk.Button(self.button_frame, text=" Play ", command=self.play_animation)
         self.play_button.pack(side=tk.LEFT, padx=10)
         self.pause_button = tk.Button(self.button_frame, text="Pause", command=self.pause_animation)
@@ -84,7 +85,7 @@ class GraphAnimator:
         self.frame_images = []
         # temp label that shows progress of pre-computation
         self.precompute_label = ttk.Label(self.anim_frame, text=f" Rendering frames (0 from {len(self.graphs)-1}) ", font = 'Helvetica 20 bold')
-        self.precompute_label.place(relx=0.3, rely=0.18, relwidth=0.42, relheight=0.28)
+        self.precompute_label.place(relx=0.3, rely=0.17, relwidth=0.44, relheight=0.28)
         for idx, g in enumerate(self.graphs):
             self.precompute_label.config(text = f" Rendering frames ({idx} from {len(self.graphs)-1}) ")
             self.parent_frame.update_idletasks()
@@ -133,7 +134,7 @@ class GraphAnimator:
 
         self.animation = FuncAnimation(
             self.fig, animate, frames=len(self.frame_images),
-            interval=200, blit=True, repeat=True
+            interval=self.interframe, blit=True, repeat=True
         )
         self.canvas.draw()
     

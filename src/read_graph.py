@@ -441,7 +441,7 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
         g = ig.Graph.Weighted_Adjacency(data, mode='directed')
         
     # default values
-    node_color = "gray"
+    node_color = "blue"
     node_size = kwargs["node_size"] if "node_size" in kwargs else 15
     default_edge_width = kwargs["edge_width"] if "edge_width" in kwargs else 5
 
@@ -512,7 +512,6 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
     visual_style["vertex_size"] = node_size
     visual_style["vertex_color"] = node_color
     visual_style["vertex_frame_color"] = marker_frame_color
-    # visual_style["vertex_frame_color"] = [(0.5, 0.5, 0.5, 0)] * g.vcount()
     edge_cmap = get_cmap('Greys')
     visual_style["edge_arrow_width"] = rescale(np.array([w['weight'] for w in g.es]), default_edge_width)*(default_edge_width)
     
@@ -724,7 +723,7 @@ def display_stats(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affi
             
     if len(path_to_file) != 1 and not avg_graph:
         display_stats_multilayer(path_to_file, ax, percentage_threshold, mnn, affinity, mutual,
-                                 node_metric = node_metric, deg = kwargs["deg"], stacked = stacked)
+                                 node_metric = node_metric, deg = kwargs["deg"], stacked = stacked, show_legend = kwargs["show_legend"])
         return
     else:
         data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, affinity = affinity, 
@@ -789,6 +788,8 @@ def display_stats(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affi
     else:
         ax.set_xlabel("Edge values")
         ax.set_title("No 'node metric' was selected, showing edge values.")
+
+
             
 def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affinity = True, mutual = True,
                              node_metric = "none",stacked = True, **kwargs):
@@ -888,6 +889,8 @@ def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn =
     else:
         ax.set_xlabel("Edge values")
         ax.set_title("No 'node metric' was selected, showing edge values.")
+    if "show_legend" in kwargs and kwargs["show_legend"] is False:
+        ax.get_legend().remove()
         
 def display_animation(path_to_file, parent_frame = None, percentage_threshold = 0.0, mnn = None, affinity = True, rm_fb_loops = True, mutual = True, **kwargs):
     layers_layout = read_graph(path_to_file, percentage_threshold = 0, mnn = None, return_ig=True, affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual) #here to make sure layout stays consistent upon graph cut
@@ -896,7 +899,7 @@ def display_animation(path_to_file, parent_frame = None, percentage_threshold = 
     
     default_node_size = kwargs["node_size"] if "node_size" in kwargs else 15
     default_edge_width = kwargs["edge_width"] if "edge_width" in kwargs else 5
-    node_color = "red"
+    node_color = "blue"
     node_size = []
     for g in layers:
         size = np.array([default_node_size for v in range(g.vcount())])
@@ -994,18 +997,22 @@ def display_animation(path_to_file, parent_frame = None, percentage_threshold = 
     for i in range(len(layers)):
         visual_style = {}
         visual_style["vertex_size"] = node_size[i]
-        # visual_style["vertex_color"] = node_color[i]
-        # visual_style["vertex_frame_color"] = marker_frame_color[i]
+        visual_style["vertex_color"] = node_color
+        visual_style["vertex_frame_color"] = marker_frame_color
         visual_style["edge_arrow_width"] = rescale(np.array([w['weight'] for w in layers[i].es]), default_edge_width)*(default_edge_width)
         
         if "scale_edge_width" in kwargs and type(kwargs["scale_edge_width"]) == bool:
             g_edge_width = rescale(np.array([e['weight'] for e in layers[i].es()]), default_edge_width)
             visual_style["edge_width"] = g_edge_width
         styles.append(visual_style)
+    
+    if "interframe" in kwargs:
+        interframe = kwargs["interframe"]
+    else:
+        interframe = 200
         
     layout = layers[0].layout(layout_style)
-    
-    animation = GraphAnimator(layers, layout, styles, parent_frame)
+    animation = GraphAnimator(layers, layout, styles, parent_frame, interframe)
 
 if __name__ == '__main__':
 
@@ -1041,8 +1048,8 @@ if __name__ == '__main__':
     root.resizable(width=True, height=True)
     root.title("Multilayer graph analysis")
     display_animation([path+file1, path+file2, path+file3, path+file4], root,  mnn = None, deg = 0, 
-                      percentage_threshold = 50,
-                  node_metric = "k-core", mutual = True, idx = [], node_size = 5, edge_width = 2,
+                      percentage_threshold = 50, layout = "circle",
+                  node_metric = "k-core", mutual = True, idx = [], node_size = 50, edge_width = 2,
                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None)
     root.mainloop()
     t2 = time.time()
