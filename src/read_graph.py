@@ -889,10 +889,10 @@ def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn =
         ax.set_xlabel("Edge values")
         ax.set_title("No 'node metric' was selected, showing edge values.")
         
-def display_animation(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affinity = True, rm_fb_loops = True, mutual = True, **kwargs):
+def display_animation(path_to_file, parent_frame = None, percentage_threshold = 0.0, mnn = None, affinity = True, rm_fb_loops = True, mutual = True, **kwargs):
     layers_layout = read_graph(path_to_file, percentage_threshold = 0, mnn = None, return_ig=True, affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual) #here to make sure layout stays consistent upon graph cut
     layers = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=True, affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual) 
-    layers_data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=False, affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual)
+    layers_data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=False, affinity = affinity, rm_fb_loops = rm_fb_loops, )
     
     default_node_size = kwargs["node_size"] if "node_size" in kwargs else 15
     default_edge_width = kwargs["edge_width"] if "edge_width" in kwargs else 5
@@ -1004,9 +1004,9 @@ def display_animation(path_to_file, ax, percentage_threshold = 0.0, mnn = None, 
         styles.append(visual_style)
         
     layout = layers[0].layout(layout_style)
-    animation = GraphAnimator(layers, layout, styles, ax)
-    return animation.slider
-        
+    
+    animation = GraphAnimator(layers, layout, styles, parent_frame)
+
 if __name__ == '__main__':
 
     # path = "..\\data\\social network matrices 3days\\G5\\"
@@ -1037,10 +1037,14 @@ if __name__ == '__main__':
     #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None)
     fig, ax = plt.subplots(1, 1)
     t1 = time.time()
-    display_animation([path+file1, path+file2, path+file3, path+file4], ax, mnn = None, deg = 0, 
+    root = tk.Tk()
+    root.resizable(width=True, height=True)
+    root.title("Multilayer graph analysis")
+    display_animation([path+file1, path+file2, path+file3, path+file4], root,  mnn = None, deg = 0, 
                       percentage_threshold = 50,
                   node_metric = "k-core", mutual = True, idx = [], node_size = 5, edge_width = 2,
                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None)
+    root.mainloop()
     t2 = time.time()
     print(t2 - t1)
     

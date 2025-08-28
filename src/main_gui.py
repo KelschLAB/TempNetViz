@@ -17,6 +17,7 @@ import os
 from read_graph import *
 from clustering_window import *
 from settings_window import settingsWindow
+
 import threading
 import gc
 
@@ -26,6 +27,7 @@ import gc
 #       - Set a default percentage_threshold value that depends on the number of nodes. 
 #       - give possibility to display names or not
 #       - Remove spectral clustering? Fix community detection!
+#       - Fix settings that get clicked when hovering mouse over it...
 
 #       - what does it mean to be neighbors in terms of chasing?? (directed interaction). Rich club coloring does not seem to work
 #           properly in these cases. It only colors nodes that have outgoing edges.
@@ -35,7 +37,6 @@ import gc
 #       - figure out why -1 in nn for mnn
 #       - Check that feedback loops rm works, and that display of distance graphs also works
 #       - mnn in clustering should be fixed (the displayed cut graph isnt cut properly)
-#       - statistical test of random chance for rich club in statistics tabs
 #       - add to settings possibility to change colormaps for layers, base node size, base colors and colormap for edges.
 #       - write tests
 
@@ -306,22 +307,17 @@ class App:
         for fm in self.content_frame.winfo_children():
             fm.destroy()
             root.update()
-        px = 1/plt.rcParams['figure.dpi']  # pixel in inches
-        f = Figure(figsize=(800*px,400*px), dpi = 100)
-        a = f.add_subplot(111)
-        canvas = FigureCanvasTkAgg(f, master=self.content_frame)
-        NavigationToolbar2Tk(canvas, self.content_frame)
-        canvas.get_tk_widget().pack()#fill=tk.BOTH, expand=True, side="top") 
 
-        slider = display_animation(self.path_to_file, a, percentage_threshold = self.percentage_threshold, mnn = self.mnn_number, mutual = self.mutual, \
+        display_animation(self.path_to_file, self.content_frame, percentage_threshold = self.percentage_threshold, mnn = self.mnn_number, mutual = self.mutual, \
                       avg_graph = self.view_type == "avg", affinity = self.edge_type == "affinity",  rm_fb_loops = self.remove_loops, \
                       layout = self.layout_style, node_metric = self.node_metric, \
                       idx = self.idx, cluster_num = self.cluster_num, layer_labels=self.path_to_file, deg = self.degree,
                       edge_width = int(self.edge_thickness_var.get()), node_size = int(self.node_thickness_var.get()), 
                       scale_edge_width = self.scale_edge_width, between_layer_edges = self.between_layer_edges)
-        self.anim_slider = slider
-
-        canvas.draw()
+        # canvas = FigureCanvasTkAgg(f, master=self.content_frame)
+        # # NavigationToolbar2Tk(canvas, self.content_frame)
+        # canvas.get_tk_widget().pack()#fill=tk.BOTH, expand=True, side="top") 
+        # canvas.draw()
 
     # function for graph selection and display
     def get_checked(self):
