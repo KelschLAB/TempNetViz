@@ -352,7 +352,7 @@ def rich_club_p_value(path_to_file, k, percentage_threshold, mnn, affinity = Tru
     p_value = np.sum(random_observations == actual_observation)/bootstrap_iter
     return p_value
 
-def community_clustering(path_to_file):
+def community_clustering(path_to_file, mnn = None, percentage_threshold = 0.0, mutual = True,  affinity = True, **kwargs):
     """
     Clusters input graph into communities, follow the optimal community algorithm
 
@@ -364,11 +364,16 @@ def community_clustering(path_to_file):
     -------
     idx: list of indexes for the nodes.
     """
+
     if len(path_to_file) > 1:
         mb.showwarning(title = "Warning", message = "Community will be computed on the averaged graph, as the algorithm cannot deal with multilyer information.")
-        data = read_graph(path_to_file, avg_graph=True, affinity = affinity)
+        data = read_graph(path_to_file, avg_graph=True, mnn = mnn, 
+                          percentage_threshold=percentage_threshold, mutual = mutual,  affinity = affinity)[0]
     else:
-        data = read_graph(path_to_file, affinity = affinity)
+        data = read_graph(path_to_file, avg_graph=True, mnn = mnn, 
+                          percentage_threshold=percentage_threshold, mutual = mutual,  affinity = affinity)
+    
+    data = np.where(data <= 0.01, 0, data) 
     
     if isSymmetric(data):
         g = ig.Graph.Weighted_Adjacency(data, mode='undirected')
@@ -1016,44 +1021,45 @@ def display_animation(path_to_file, parent_frame = None, percentage_threshold = 
 
 if __name__ == '__main__':
 
-    # path = "..\\data\\social network matrices 3days\\G5\\"
-    # file1 = "approaches_resD3_1.csv"
-    # file2 = "approaches_resD3_2.csv"
-    # file3 = "approaches_resD3_3.csv"
-    # file4 = "interactions_resD3_2.csv"
+    path = "..\\data\\nosemaze\\both_cohorts_1days\\G1\\"
+    file1 = "interactions_resD1_1.csv"
+    file2 = "interactions_resD1_2.csv"
+    file3 = "interactions_resD1_3.csv"
+    file4 = "interactions_resD1_2.csv"
     
-    path = "..\\data\\random_graph\\"
-    file1 = "rand_graph1.csv"
-    file2 = "rand_graph2.csv"
-    file3 = "rand_graph3.csv"
-    file4 = "rand_graph4.csv"
-    file5 = "rand_graph5.csv"
+    # path = "..\\data\\random_graph\\"
+    # file1 = "rand_graph1.csv"
+    # file2 = "rand_graph2.csv"
+    # file3 = "rand_graph3.csv"
+    # file4 = "rand_graph4.csv"
+    # file5 = "rand_graph5.csv"
 
-    data = read_graph([path+file1], mnn = 3, return_ig=False)[0]
-    if isSymmetric(data):
-        g = ig.Graph.Weighted_Adjacency(data, mode='undirected')
-    else:
-        g = ig.Graph.Weighted_Adjacency(data, mode='directed')
+    # data = read_graph([path+file1], mnn = 3, return_ig=False)[0]
+    # if isSymmetric(data):
+    #     g = ig.Graph.Weighted_Adjacency(data, mode='undirected')
+    # else:
+    #     g = ig.Graph.Weighted_Adjacency(data, mode='directed')
     
-    # c = community_clustering(path+file)
+    c = community_clustering([path+file1, path+file2, path+file3, path+file4], mnn = 4, mutual = True, affinity = True)
+    
     # f = plt.Figure()
     # fig, ax = plt.subplots(1, 1)
     # ax = fig.add_subplot(111, projection='3d')
     # display_graph([path+file1, path+file2], ax, mnn = None, deg = 0, percentage_threshold = 50,
     #               node_metric = "k-core", mutual = True, idx = [], node_size = 5, edge_width = 2,
     #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None)
-    fig, ax = plt.subplots(1, 1)
-    t1 = time.time()
-    root = tk.Tk()
-    root.resizable(width=True, height=True)
-    root.title("Multilayer graph analysis")
-    display_animation([path+file1, path+file2, path+file3, path+file4], root,  mnn = None, deg = 0, 
-                      percentage_threshold = 50, layout = "circle",
-                  node_metric = "k-core", mutual = True, idx = [], node_size = 50, edge_width = 2,
-                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None)
-    root.mainloop()
-    t2 = time.time()
-    print(t2 - t1)
+    # plt.show()
+    
+    # fig, ax = plt.subplots(1, 1)
+    # root = tk.Tk()
+    # root.resizable(width=True, height=True)
+    # root.title("Multilayer graph analysis")
+    # display_animation([path+file1, path+file2, path+file3, path+file4], root,  mnn = None, deg = 0, 
+    #                   percentage_threshold = 50, layout = "circle",
+    #               node_metric = "k-core", mutual = True, idx = [], node_size = 50, edge_width = 2,
+    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None)
+    # root.mainloop()
+
     
     # plt.show()
     # c = display_stats([path+file1, path+file2, path+file3], ax = ax, mnn = 4, node_metric = "rich-club", deg = 2)

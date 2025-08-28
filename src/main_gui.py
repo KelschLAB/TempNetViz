@@ -23,13 +23,10 @@ import gc
 
 #To-do: 
 #       - give possibility to display names or not
-#       - Remove spectral clustering? Fix community detection!
+#       - Remove spectral clustering? make community detection a bit more intuitive, and add more options.
 
 
 #       - Set a default percentage_threshold value that depends on the number of nodes. 
-#       - what does it mean to be neighbors in terms of chasing?? (directed interaction). Rich club coloring does not seem to work
-#           properly in these cases. It only colors nodes that have outgoing edges.
-#       - setting: stacked histogram and side by side are inverted.
 #       - fix overlapping small white link between nodes that make visualization hard
 #       - remove colorbar from 3D view
 #       - figure out why -1 in nn for mnn
@@ -467,7 +464,9 @@ class App:
         self.clustertype_wdw.destroy()
         
     def unsupervised_button(self):
-        self.idx = community_clustering(self.path_to_file)
+        self.idx = community_clustering(self.path_to_file, mnn = self.mnn_number, 
+                                        percentage_threshold=self.percentage_threshold, 
+                                        mutual = self.mutual, affinity = self.edge_type == "affinity")
         print(self.idx)
         self.cluster_num = max(self.idx)+1
         self.clustertype_wdw.destroy()
