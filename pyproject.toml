@@ -1,0 +1,27 @@
+[project]
+name = "tempgraphviz"
+version = "0.1.0"
+description = "An interactive GUI for the visualization of temporal graphs"
+authors = [
+    {name = "Corentin Nelias"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "igraph (>=0.11.9,<0.12.0)",
+    "networkx (>=3.5,<4.0)",
+    "scipy (>=1.16.1,<2.0.0)",
+    "matplotlib (>=3.10.5,<4.0.0)",
+    "numpy (>=2.3.2,<3.0.0)",
+    "pandas (>=2.3.2,<3.0.0)"
+]
+
+[tool.poetry]
+packages = [
+    { include = "tempgraphviz", from = "src" }
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
 from tkinter import filedialog
-from tooltip import ToolTip
+from .tooltip import ToolTip
 import matplotlib
 
 class settingsWindow(tk.Toplevel):

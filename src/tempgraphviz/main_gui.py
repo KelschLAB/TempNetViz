@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-# import tkinter.font as tkFont
-# from pprint import pprint
+
 import webbrowser
 from tkinter import filedialog
 import matplotlib
@@ -14,18 +13,15 @@ matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import *
 from matplotlib.figure import Figure
 import os
-from read_graph import *
-# from clustering_window import *
-from settings_window import settingsWindow
-from listbox_selection import MultiSelectDropdown
-from tooltip import ToolTip
-# import threading
-# import gc
+from .read_graph import *
+from .settings_window import settingsWindow
+from .listbox_selection import MultiSelectDropdown
+from .tooltip import ToolTip
+
 
 #To-do: 
-
+#       - !!color of the edges in animation with colormaps does not reflect width!!
 #       - Set a default percentage_threshold value that depends on the number of nodes. 
-#       - remove colorbar from 3D view
 #       - figure out why -1 in nn for mnn
 #       - Check that feedback loops rm works, and that display of distance graphs also works
 #       - mnn in clustering should be fixed (the displayed cut graph isnt cut properly)
@@ -231,7 +227,12 @@ class App:
             self.percentage_threshold = 0.0
             self.mnn_number = None
             self.mutual = True
-            self.plot_in_frame()
+            if self.display_type == "plot":
+                self.plot_in_frame()
+            elif self.display_type == "stats":
+                self.stats_in_frame()
+            elif self.display_type == "animation":
+                self.animation_in_frame()
             win.destroy()
             
         popup = tk.Toplevel(root)
@@ -329,11 +330,17 @@ class App:
                       node_cmap = self.node_cmap, edge_cmap = self.edge_cmap)
         
         if self.scale_edge_width:
-            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.edge_cmap), ax=a, label="Normalized edge value", shrink = 0.3, location = 'right', pad = 0.1)
+            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.edge_cmap),
+                       ax=a, label="Normalized edge value", shrink = 0.3,
+                       location = 'right', pad = 0.1, fraction=0.05)
         if self.node_metric != "none" and self.node_cmap != "none":
-            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.node_cmap), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
+            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.node_cmap), ax=a,
+                       label="Normalized metric value", shrink = 0.3,
+                       fraction=0.05, location = 'left')
         else: # to keep layout consistent across changes of settings
-            cb = f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
+            cb = f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds),
+                            ax=a, label="Normalized metric value", shrink = 0.3,
+                            fraction=0.05, location = 'left')
             cb.remove()
     
     def graphcut_param_window(self, event):

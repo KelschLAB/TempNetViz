@@ -12,9 +12,9 @@ import os
 from copy import copy
 from warnings import warn
 from tkinter import messagebox as mb
-from clustering_algorithm import *
-from multilayer_plot import *
-from graph_animation import *
+# from clustering_algorithm import *
+from .multilayer_plot import *
+from .graph_animation import *
 import pandas as pd
 import time 
 import matplotlib.colors as mcolors

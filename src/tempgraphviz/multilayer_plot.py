@@ -12,7 +12,7 @@ from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from matplotlib.patches import FancyArrowPatch
 from mpl_toolkits.mplot3d import proj3d
 from mpl_toolkits.mplot3d.art3d import Text3D
-from read_graph import *
+from .read_graph import *
 
 class Arrow3D(FancyArrowPatch):
     def __init__(self, xs, ys, zs, *args, **kwargs):
