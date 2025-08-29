@@ -13,14 +13,21 @@ matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import *
 from matplotlib.figure import Figure
 import os
-from .read_graph import *
-from .settings_window import settingsWindow
-from .listbox_selection import MultiSelectDropdown
-from .tooltip import ToolTip
+import sys
+
+if __name__ == "__main__" and __package__ is None:
+    # Go up one level to the package root
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+    __package__ = "tempgraphviz"
+
+from tempgraphviz.read_graph import *
+from tempgraphviz.settings_window import settingsWindow
+from tempgraphviz.listbox_selection import MultiSelectDropdown
+from tempgraphviz.tooltip import ToolTip
 
 
 #To-do: 
-#       - !!color of the edges in animation with colormaps does not reflect width!!
+#       - !!!!!color of the edges in animation with colormaps does not reflect width!!!!!
 #       - Set a default percentage_threshold value that depends on the number of nodes. 
 #       - figure out why -1 in nn for mnn
 #       - Check that feedback loops rm works, and that display of distance graphs also works
