@@ -44,6 +44,7 @@ class MultiSelectDropdown:
         self.refresh_listbox()
         
     def refresh_listbox(self):
+        self.listbox.delete(0,tk.END)
         self.all_items = self.choices.copy()
         for item in self.all_items:
             self.listbox.insert(tk.END, item)

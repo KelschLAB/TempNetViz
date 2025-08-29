@@ -30,7 +30,8 @@ class Arrow3D(FancyArrowPatch):
 class LayeredNetworkGraph(object):
 
     def __init__(self, graphs_layout, graphs, graphs_data, node_labels=None, layout=nx.spring_layout, nodes_width = None,
-                 default_edge_width = 5, ax=None, node_edge_colors = None, layer_labels = None, scale_edge_width = True, between_layer_edges = True):
+                 default_edge_width = 5, ax=None, node_edge_colors = None, layer_labels = None,
+                 scale_edge_width = True, between_layer_edges = True, show_planes = True, **kwargs):
         """Given an ordered list of graphs [g1, g2, ..., gn] that represent
         different layers in a multi-layer network, plot the network in
         3D with the different layers separated along the z-axis.
@@ -57,8 +58,16 @@ class LayeredNetworkGraph(object):
         ax : mpl_toolkits.mplot3d.Axes3d instance or None (default None)
             The axis to plot to. If None is given, a new figure and a new axis are created.
         """
+        if "edge_cmap" in kwargs:
+            self.cmap_edges = kwargs["edge_cmap"]
+        else:
+            self.cmap_edges = cm.Greys
         
-        self.cmap_edges = cm.Greys
+        if "node_cmap" in kwargs and kwargs["node_cmap"] != "none":
+            self.cmap_nodes = [kwargs["node_cmap"]]*len(graphs_layout)
+        else:
+            self.cmap_nodes = [cm.Reds, cm.Blues, cm.Greens, cm.Oranges, cm.Purples]*len(graphs_layout)
+            
         self.graphs_layout = [g.to_networkx() for g in graphs_layout] # for layout, should be read without graph-cut (mnn or threshold) in order to stay constant.
         self.graphs = [g.to_networkx() for g in graphs]
         self.data = [data for data in graphs_data]
@@ -68,10 +77,15 @@ class LayeredNetworkGraph(object):
         self.layer_labels = layer_labels
         self.between_layer_edges = between_layer_edges
         self.symmetry = [] # to store whether or not graphs are directed
+        self.planes_alpha = 0.15 if show_planes else 0
+        self.edge_colors = []
         for g in self.graphs:
             weights = nx.get_edge_attributes(g, "weight").values()
+            rescaled_weights = self.rescale(np.array([w for w in weights]), default_edge_width)
+            for w in rescaled_weights:
+                self.edge_colors.append(self.cmap_edges((w - 0.001)/default_edge_width)) #subtracting 0.001 to ensure colormap is not called with 1 (which would be cycle back to 0).
             if scale_edge_width:
-                g_edge_width = self.rescale(np.array([w for w in weights]), default_edge_width)
+                g_edge_width = rescaled_weights
             else:
                 g_edge_width = np.array([1 if w > 0.01 else 0 for w in weights])*default_edge_width
             self.edge_width.extend(g_edge_width)
@@ -79,10 +93,7 @@ class LayeredNetworkGraph(object):
         for graph_index, d in enumerate(self.data):
             self.symmetry.extend([self.isSymmetric(d) for i in range(len(self.graphs[graph_index].edges))])
                 
-        self.edge_colors = []
-        for w in self.edge_width:
-            self.edge_colors.append(self.cmap_edges((w - 0.001)/default_edge_width)) #subtracting 0.001 to ensure colormap is not called with 1 (which would be cycle back to 0).
-        
+       
         self.nodes_width = nodes_width
         self.total_layers = len(graphs)
 
@@ -218,8 +229,8 @@ class LayeredNetworkGraph(object):
         U, V = np.meshgrid(u ,v)
         W = z * np.ones_like(U)
         self.ax.plot_surface(U, V, W, *args, **kwargs)
-        if layer_label != None:
-            self.ax.text(-1, -1, z, os.path.basename(layer_label))
+        # if layer_label != None:
+        #     self.ax.text(-1, -1, z, os.path.basename(layer_label))
 
     def draw_node_labels(self, node_labels, *args, **kwargs):
         for node, z in self.nodes:
@@ -231,14 +242,15 @@ class LayeredNetworkGraph(object):
                         , linewidths=self.edge_width, facecolor=self.edge_colors,  colors=self.edge_colors)
         if self.between_layer_edges:
             self.draw_edges(self.edges_between_layers, arrow = False, color='k', alpha=0.2, linestyle='--', zorder=2, lw = 1)
-        cmap_list = [cm.Reds, cm.Blues, cm.Greens, cm.Oranges, cm.Purples]*self.total_layers
+            
         for z in range(self.total_layers):
+            plane_color = self.cmap_nodes[z](0.5) 
             if self.layer_labels != None:
-                self.draw_plane(z, layer_label = self.layer_labels[z], alpha=0.05, zorder=1)
+                self.draw_plane(z, layer_label = self.layer_labels[z], alpha=self.planes_alpha, color=plane_color,zorder=1)
             else:
-                self.draw_plane(z, alpha=0.05, zorder=1)
+                self.draw_plane(z, alpha=self.planes_alpha,color=plane_color, zorder=1)
             if self.nodes_width is not None and type(self.nodes_width) == list:
-                colors = [cmap_list[z](width) for width in self.rescale(self.nodes_width[z], 1)]
+                colors = [self.cmap_nodes[z](width) for width in self.rescale(self.nodes_width[z], 1)]
                 self.draw_nodes([node for node in self.nodes if node[1]==z], \
                                 s=self.nodes_width[z]*50, zorder=3, \
                                 edgecolors = self.node_edge_colors, linewidths=2, c = colors, depthshade=False)

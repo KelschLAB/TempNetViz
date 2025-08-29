@@ -17,6 +17,8 @@ from multilayer_plot import *
 from graph_animation import *
 import pandas as pd
 import time 
+import matplotlib.colors as mcolors
+
 
 def isSymmetric(mat):
     transmat = np.array(mat).transpose()
@@ -115,7 +117,7 @@ def read_labels(path_to_file):
         return [l for l in labels]
         
 def read_graph(path_to_file, percentage_threshold = 0.01, mnn = None, return_ig = False,
-               avg_graph = False, affinity = True, rm_fb_loops = True, mutual = True):
+               avg_graph = False, affinity = True, rm_fb_loops = True, mutual = True, rm_index = True):
     """
     Reads a file containing the weights defning the adjacency matrix. 
 
@@ -138,13 +140,13 @@ def read_graph(path_to_file, percentage_threshold = 0.01, mnn = None, return_ig 
     """
 
     random.seed(1) #making sure layout of plots stays the same when changing metrics
-
+    start_idx = 1 if rm_index else 0
     if not avg_graph:
         #accounting for potential multiple layers
         data = []
         for i in range(len(path_to_file)):
             arr = np.loadtxt(path_to_file[i], delimiter=",", dtype=str)
-            layer_data = arr[1:, 1:].astype(float)
+            layer_data = arr[start_idx:, start_idx:].astype(float)
             if not affinity: # if graph edges represent distances and not affinities, need to invert values
                layer_data = inverse(layer_data, rm_fb_loops)
 
@@ -165,10 +167,10 @@ def read_graph(path_to_file, percentage_threshold = 0.01, mnn = None, return_ig 
     elif avg_graph:
         # averaged graph
         arr = np.loadtxt(path_to_file[0], delimiter=",", dtype=str)
-        data = arr[1:, 1:].astype(float)/len(path_to_file)
+        data = arr[start_idx:, start_idx:].astype(float)/len(path_to_file)
         for i in range(1, len(path_to_file)):
             arr = np.loadtxt(path_to_file[i], delimiter=",", dtype=str)
-            data += arr[1:, 1:].astype(float)/len(path_to_file) 
+            data += arr[start_idx:, start_idx:].astype(float)/len(path_to_file) 
         if not affinity:
            data = inverse(data, rm_fb_loops)
            
@@ -185,7 +187,7 @@ def read_graph(path_to_file, percentage_threshold = 0.01, mnn = None, return_ig 
         return [data]
         
 def randomize_graph(path_to_file, percentage_threshold = 0.01, mnn = None, return_ig = False,
-                    avg_graph = False, affinity = True, mutual = True):
+                    avg_graph = False, affinity = True, mutual = True, rm_index = True):
     """
     Reads a file containing the weights defning the adjacency matrix, then randomizes the graph 
     for bootstrap purposes.
@@ -194,10 +196,10 @@ def randomize_graph(path_to_file, percentage_threshold = 0.01, mnn = None, retur
     """
 
     random.seed(1) #making sure layout of plots stays the same when changing metrics
-
+    start_idx = 1 if rm_index else 0
     if len(path_to_file) == 1:
         arr = np.loadtxt(path_to_file, delimiter=",", dtype=str)
-        data = arr[1:, 1:].astype(float)
+        data = arr[start_idx:, start_idx:].astype(float)
         np.random.shuffle(data) # randomizing graph while keeping weights constant.
         if not affinity: # If input data represents distance, need to invert values
             data = inverse(data)
@@ -217,10 +219,10 @@ def randomize_graph(path_to_file, percentage_threshold = 0.01, mnn = None, retur
     
     elif len(path_to_file) > 1:
         arr = np.loadtxt(path_to_file[0], delimiter=",", dtype=str)
-        data = arr[1:, 1:].astype(float)/len(path_to_file)
+        data = arr[start_idx:, start_idx:].astype(float)/len(path_to_file)
         for i in range(1, len(path_to_file)):
             arr = np.loadtxt(path_to_file[i], delimiter=",", dtype=str)
-            data += arr[1:, 1:].astype(float)/len(path_to_file) 
+            data += arr[start_idx:, start_idx:].astype(float)/len(path_to_file) 
         np.random.shuffle(data) # randomizing graph while keeping weights constant.
         if not affinity: # If input data represents distance, need to invert values
             data = inverse(data)
@@ -260,7 +262,6 @@ def rich_club_weights(graph, k, min_val = 0.05):
         else:
             weights.append(min_val)
     return weights
-
 
 def k_core_weights(data, k, min_val = 0.05):
     """
@@ -308,7 +309,6 @@ def rich_club_size(graph, k, min_val = 0.05):
             core_size += 1
     return core_size
 
-
 def k_core_size(graph, k, min_val = 0.05):
     """
     Returns the size of the k core of input graph for degree = k.
@@ -319,8 +319,6 @@ def k_core_size(graph, k, min_val = 0.05):
         if s > 0.1:
             core_size += 1
     return core_size
-
-
 
 def rich_club_p_value(path_to_file, k, percentage_threshold, mnn, affinity = True, bootstrap_iter = 250, mutual = True):
     """
@@ -352,7 +350,7 @@ def rich_club_p_value(path_to_file, k, percentage_threshold, mnn, affinity = Tru
     p_value = np.sum(random_observations == actual_observation)/bootstrap_iter
     return p_value
 
-def community_clustering(path_to_file, mnn = None, percentage_threshold = 0.0, mutual = True,  affinity = True, **kwargs):
+def community_clustering(path_to_file, algorithm = "modularity", mnn = None, percentage_threshold = 0.0, mutual = True,  affinity = True, **kwargs):
     """
     Clusters input graph into communities, follow the optimal community algorithm
 
@@ -364,14 +362,13 @@ def community_clustering(path_to_file, mnn = None, percentage_threshold = 0.0, m
     -------
     idx: list of indexes for the nodes.
     """
-
     if len(path_to_file) > 1:
-        mb.showwarning(title = "Warning", message = "Community will be computed on the averaged graph, as the algorithm cannot deal with multilyer information.")
+        # mb.showwarning(title = "Warning", message = "Community will be computed on the averaged graph, as the algorithm cannot deal with multilyer information.")
         data = read_graph(path_to_file, avg_graph=True, mnn = mnn, 
                           percentage_threshold=percentage_threshold, mutual = mutual,  affinity = affinity)[0]
     else:
         data = read_graph(path_to_file, avg_graph=True, mnn = mnn, 
-                          percentage_threshold=percentage_threshold, mutual = mutual,  affinity = affinity)
+                          percentage_threshold=percentage_threshold, mutual = mutual,  affinity = affinity)[0]
     
     data = np.where(data <= 0.01, 0, data) 
     
@@ -380,7 +377,15 @@ def community_clustering(path_to_file, mnn = None, percentage_threshold = 0.0, m
     else:
         g = ig.Graph.Weighted_Adjacency(data, mode='directed')
         
-    communities = g.community_optimal_modularity(weights = [1/(e['weight']) for e in g.es()])
+    if algorithm == "modularity":
+        communities = g.community_optimal_modularity(weights = [1/(e['weight']) for e in g.es()])
+    elif algorithm == "louvain":
+        communities = g.community_multilevel(weights=[1/e['weight'] for e in g.es()])
+    elif algorithm == "walktrap":
+        dendrogram = g.community_walktrap(weights=[1/e['weight'] for e in g.es()])
+        communities = dendrogram.as_clustering()
+    elif algorithm == "infomap":
+        communities = g.community_infomap(edge_weights=[1/e['weight'] for e in g.es()])
 
     total_length = data.shape[0]
     idx = [0 for i in range(total_length)]
@@ -390,7 +395,7 @@ def community_clustering(path_to_file, mnn = None, percentage_threshold = 0.0, m
     return idx
     
 def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_graph = False,
-                  affinity = True, rm_fb_loops = True, mutual = True, **kwargs):
+                  affinity = True, rm_fb_loops = True, mutual = True, rm_index = True, **kwargs):
     """
     This function displays the graph to analyze and colors the vertices/edges according
     to the given input parameters.
@@ -426,7 +431,7 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
     else:
         layout_style = "fr"
         
-    node_labels = read_labels(path_to_file) if "node_labels" not in kwargs else kwargs["node_labels"]
+    node_labels = read_labels(path_to_file) if ("node_labels" in kwargs and kwargs["node_labels"]) else None
         
     if len(path_to_file) > 1 and not avg_graph:
         layer_labels = kwargs["layer_labels"] if "layer_labels" in kwargs else None
@@ -434,11 +439,12 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
                          rm_fb_loops = rm_fb_loops, mutual = mutual, layout = layout_style, node_metric = kwargs["node_metric"], idx = kwargs["idx"], \
                          cluster_num = kwargs["cluster_num"], layer_labels = layer_labels, node_labels = node_labels, deg = kwargs["deg"], 
                          node_size = kwargs["node_size"], edge_width = kwargs["edge_width"], scale_edge_width = kwargs["scale_edge_width"],
-                         between_layer_edges = kwargs["between_layer_edges"])
+                         between_layer_edges = kwargs["between_layer_edges"], rm_index = rm_index,
+                         show_planes = kwargs["show_planes"], edge_cmap = kwargs["edge_cmap"], node_cmap = kwargs["node_cmap"])
         return
     else:
         data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, mutual = mutual, \
-                          avg_graph = avg_graph, affinity = affinity, rm_fb_loops = rm_fb_loops)[0]
+                          avg_graph = avg_graph, affinity = affinity, rm_fb_loops = rm_fb_loops, rm_index = rm_index)[0]
 
     if isSymmetric(data):
         g = ig.Graph.Weighted_Adjacency(data, mode='undirected')
@@ -446,12 +452,15 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
         g = ig.Graph.Weighted_Adjacency(data, mode='directed')
         
     # default values
-    node_color = "blue"
-    node_size = kwargs["node_size"] if "node_size" in kwargs else 15
+    node_color = "black"
+    default_node_size = kwargs["node_size"] if "node_size" in kwargs else 15
     default_edge_width = kwargs["edge_width"] if "edge_width" in kwargs else 5
 
-    # cmap1 = cm.Reds
-    cmap1 = cm.Grays
+    if "node_cmap" in kwargs and kwargs["node_cmap"] != "none":
+        cmap1 = kwargs["node_cmap"]
+    else:
+        cmap1 = mcolors.ListedColormap(['black'])
+        
     if "node_metric" in kwargs:
         if kwargs["node_metric"] == "betweenness":
             edge_betweenness = g.betweenness(weights = [1/e['weight'] for e in g.es()]) #taking the inverse of edge values as we want high score to represent low distances
@@ -500,6 +509,8 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
             node_size = k_core_weights(data, k_degree, 0.5)
             node_color = [cmap1(0.99) if b == 1 else cmap1(0.2) for b in node_size]
             node_size = [n*default_node_size for n in node_size]
+        else: # in case no metric is given
+            node_size = default_node_size
         
     if "idx" in kwargs:
         if len(kwargs["idx"]) == 0:
@@ -517,7 +528,10 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
     visual_style["vertex_size"] = node_size
     visual_style["vertex_color"] = node_color
     visual_style["vertex_frame_color"] = marker_frame_color
-    edge_cmap = get_cmap('Greys')
+    if "edge_cmap" in kwargs:
+        edge_cmap = kwargs["edge_cmap"]
+    else:
+        edge_cmap = get_cmap('Greys')
     visual_style["edge_arrow_width"] = rescale(np.array([w['weight'] for w in g.es]), default_edge_width)*(default_edge_width)
     
     if "scale_edge_width" in kwargs and type(kwargs["scale_edge_width"]) == bool:
@@ -526,7 +540,7 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
             edge_color = [edge_cmap(edge) for edge in rescale(np.array([w['weight'] for w in g.es])) - 0.01]
         else:
             display_edge_width = np.array([0.99 if w['weight'] > 0.01 else 0 for w in g.es])*default_edge_width
-            edge_color = [edge_cmap(0.99) for edge in g.es]
+            edge_color = [edge_cmap(edge) for edge in rescale(np.array([w['weight'] for w in g.es])) - 0.01]
     else:
         display_edge_width = rescale(np.array([w['weight'] for w in g.es]), default_edge_width)
         edge_color = [edge_cmap(edge) for edge in rescale(np.array([w['weight'] for w in g.es])) - 0.01]
@@ -542,15 +556,13 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
         visual_style["edge_curved"] = 0.2
     visual_style["vertex_frame_width"] = 3
     visual_style["vertex_label"] = node_labels
-    # g.vs["label"] =  node_labels#[v.index for v in g.vs()]
     g.vs["name"] = node_labels
-    # visual_style["vertex_label_size"] = 20
-    # visual_style["vertex_label_dist"] = 0.5
 
     visual_style["vertex_font"] = "Times"
     ig.plot(g, target=ax, **visual_style)
     
-def display_graph_3d(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affinity = True, rm_fb_loops = True, mutual = True, **kwargs):
+def display_graph_3d(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affinity = True,
+                     rm_fb_loops = True, mutual = True, rm_index = True, **kwargs):
     """
     This function displays the graph to analyze and colors the vertices/edges according
     to the given input parameters.
@@ -580,9 +592,12 @@ def display_graph_3d(path_to_file, ax, percentage_threshold = 0.0, mnn = None, a
     """
     random.seed(1) #making sure layout of plots stays the same when changing metrics
 
-    layers_layout = read_graph(path_to_file, percentage_threshold = 0, mnn = None, return_ig=True, affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual) #here to make sure layout stays consistent upon graph cut
-    layers = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=True, affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual) 
-    layers_data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=False, affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual)
+    layers_layout = read_graph(path_to_file, percentage_threshold = 0, mnn = None, return_ig=True, affinity = affinity,
+                               rm_fb_loops = rm_fb_loops, mutual = mutual,  rm_index = rm_index) #here to make sure layout stays consistent upon graph cut
+    layers = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=True, affinity = affinity,
+                        rm_fb_loops = rm_fb_loops, mutual = mutual, rm_index = rm_index) 
+    layers_data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=False,
+                             affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual, rm_index = rm_index)
 
     default_node_size = kwargs["node_size"] if "node_size" in kwargs else 15
     default_edge_width = kwargs["edge_width"] if "edge_width" in kwargs else 5
@@ -697,12 +712,13 @@ def display_graph_3d(path_to_file, ax, percentage_threshold = 0.0, mnn = None, a
     LayeredNetworkGraph(layers_layout, layers, layers_data, ax=ax, layout=layout, 
                         node_labels = node_labels, nodes_width=node_size, node_edge_colors=marker_frame_color, 
                         layer_labels=layer_labels, default_edge_width=default_edge_width,
-                        scale_edge_width = scale_edge_width, between_layer_edges = kwargs["between_layer_edges"])
+                        scale_edge_width = scale_edge_width, between_layer_edges = kwargs["between_layer_edges"],
+                        show_planes = kwargs["show_planes"], edge_cmap = kwargs["edge_cmap"], node_cmap = kwargs["node_cmap"])
     ax.set_axis_off()
 
     
 def display_stats(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affinity = True, avg_graph = False,
-                  mutual = True, node_metric = "none", stacked = True, **kwargs):
+                  mutual = True, node_metric = "none", stacked = True, rm_index = True, **kwargs):
     """
     This function displays a histogram representation of the metrics of the graph to analyze.
 
@@ -728,11 +744,13 @@ def display_stats(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affi
             
     if len(path_to_file) != 1 and not avg_graph:
         display_stats_multilayer(path_to_file, ax, percentage_threshold, mnn, affinity, mutual,
-                                 node_metric = node_metric, deg = kwargs["deg"], stacked = stacked, show_legend = kwargs["show_legend"])
+                                 node_metric = node_metric, deg = kwargs["deg"],
+                                 stacked = stacked, show_legend = kwargs["show_legend"],
+                                 rm_index = rm_index)
         return
     else:
         data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, affinity = affinity, 
-                          avg_graph = avg_graph, mutual = mutual)[0]
+                          avg_graph = avg_graph, mutual = mutual, rm_index = rm_index)[0]
 
     if isSymmetric(data):
         g = ig.Graph.Weighted_Adjacency(data, mode='undirected')
@@ -797,7 +815,7 @@ def display_stats(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affi
 
             
 def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affinity = True, mutual = True,
-                             node_metric = "none",stacked = True, **kwargs):
+                             node_metric = "none",stacked = True, rm_index = True, **kwargs):
     """
     This function displays a histogram representation of the metrics of the graphs to analyze.
 
@@ -820,9 +838,10 @@ def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn =
     None.
     """    
 
-    data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, affinity = affinity, mutual = mutual)
+    data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, affinity = affinity,
+                      mutual = mutual, rm_index = rm_index)
     graph_data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn,
-                            affinity = affinity, mutual = mutual, return_ig = True)
+                            affinity = affinity, mutual = mutual, return_ig = True, rm_index = rm_index)
 
     if node_metric == "none":
         node_size = []
@@ -897,11 +916,17 @@ def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn =
     if "show_legend" in kwargs and kwargs["show_legend"] is False:
         ax.get_legend().remove()
         
-def display_animation(path_to_file, parent_frame = None, percentage_threshold = 0.0, mnn = None, affinity = True, rm_fb_loops = True, mutual = True, **kwargs):
-    layers_layout = read_graph(path_to_file, percentage_threshold = 0, mnn = None, return_ig=True, affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual) #here to make sure layout stays consistent upon graph cut
-    layers = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=True, affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual) 
-    layers_data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=False, affinity = affinity, rm_fb_loops = rm_fb_loops, )
+def display_animation(path_to_file, parent_frame = None, percentage_threshold = 0.0, mnn = None,
+                      affinity = True, rm_fb_loops = True, mutual = True, rm_index = True, **kwargs):
     
+    layers_layout = read_graph(path_to_file, percentage_threshold = 0, mnn = None, return_ig=True, affinity = affinity,
+                               rm_fb_loops = rm_fb_loops, mutual = mutual, rm_index = rm_index) #here to make sure layout stays consistent upon graph cut
+    layers = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=True, affinity = affinity,
+                        rm_fb_loops = rm_fb_loops, mutual = mutual, rm_index = rm_index) 
+    layers_data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=False, affinity = affinity,
+                             rm_fb_loops = rm_fb_loops, rm_index = rm_index )
+    
+    node_labels = read_labels(path_to_file) if ("node_labels" in kwargs and kwargs["node_labels"]) else None
     default_node_size = kwargs["node_size"] if "node_size" in kwargs else 15
     default_edge_width = kwargs["edge_width"] if "edge_width" in kwargs else 5
     node_color = "blue"
@@ -987,28 +1012,39 @@ def display_animation(path_to_file, parent_frame = None, percentage_threshold = 
         layout_style = kwargs["layout"]
     else:
         layout_style = "fr"
-        
-    if "node_labels" in kwargs:
-        node_labels = kwargs["node_labels"]
-    else:
-        node_labels = None
-        
+            
     if "layer_labels" in kwargs:
         layer_labels = kwargs["layer_labels"]
     else:
         layer_labels = None
+        
+    if "edge_cmap" in kwargs:
+        edge_cmap = kwargs["edge_cmap"]
+    else:
+        edge_cmap = get_cmap('Greys')
+        
+    if "node_cmap" in kwargs and kwargs["node_cmap"] != "none":
+        node_cmap = kwargs["node_cmap"]
+    else:
+        node_cmap = mcolors.ListedColormap(['black'])
     
     styles = []
     for i in range(len(layers)):
         visual_style = {}
         visual_style["vertex_size"] = node_size[i]
+        sizes_for_cm = rescale(node_size[i], 0.999) if len(np.unique(node_size[i])) > 1 else [0.99]*len(node_size[i])
+        node_color = [node_cmap(node) for node in sizes_for_cm]
         visual_style["vertex_color"] = node_color
         visual_style["vertex_frame_color"] = marker_frame_color
         visual_style["edge_arrow_width"] = rescale(np.array([w['weight'] for w in layers[i].es]), default_edge_width)*(default_edge_width)
-        
-        if "scale_edge_width" in kwargs and type(kwargs["scale_edge_width"]) == bool:
+        visual_style["vertex_label"] = node_labels
+
+        if "scale_edge_width" in kwargs and kwargs["scale_edge_width"]:
             g_edge_width = rescale(np.array([e['weight'] for e in layers[i].es()]), default_edge_width)
             visual_style["edge_width"] = g_edge_width
+        edge_color = [edge_cmap(edge) for edge in rescale(np.array([w['weight'] for w in g.es])) - 0.01]
+        visual_style["edge_color"] = edge_color
+
         styles.append(visual_style)
     
     if "interframe" in kwargs:
@@ -1018,21 +1054,23 @@ def display_animation(path_to_file, parent_frame = None, percentage_threshold = 
         
     layout = layers[0].layout(layout_style)
     animation = GraphAnimator(layers, layout, styles, parent_frame, interframe)
+    f, ax = animation.get_fig()
+    return f, ax
 
 if __name__ == '__main__':
 
-    path = "..\\data\\nosemaze\\both_cohorts_1days\\G1\\"
-    file1 = "interactions_resD1_1.csv"
-    file2 = "interactions_resD1_2.csv"
-    file3 = "interactions_resD1_3.csv"
-    file4 = "interactions_resD1_2.csv"
+    # path = "..\\data\\nosemaze\\both_cohorts_1days\\G1\\"
+    # file1 = "interactions_resD1_1.csv"
+    # file2 = "interactions_resD1_2.csv"
+    # file3 = "interactions_resD1_3.csv"
+    # file4 = "interactions_resD1_2.csv"
     
-    # path = "..\\data\\random_graph\\"
-    # file1 = "rand_graph1.csv"
-    # file2 = "rand_graph2.csv"
-    # file3 = "rand_graph3.csv"
-    # file4 = "rand_graph4.csv"
-    # file5 = "rand_graph5.csv"
+    path = "..\\data\\random_graph\\"
+    file1 = "rand_graph1.csv"
+    file2 = "rand_graph2.csv"
+    file3 = "rand_graph3.csv"
+    file4 = "rand_graph4.csv"
+    file5 = "rand_graph5.csv"
 
     # data = read_graph([path+file1], mnn = 3, return_ig=False)[0]
     # if isSymmetric(data):
@@ -1040,25 +1078,28 @@ if __name__ == '__main__':
     # else:
     #     g = ig.Graph.Weighted_Adjacency(data, mode='directed')
     
-    c = community_clustering([path+file1, path+file2, path+file3, path+file4], mnn = 4, mutual = True, affinity = True)
+    # c = community_clustering([path+file1, path+file2, path+file3, path+file4], algorithm = "infomap", mnn = 4, mutual = True, affinity = True)
+    # print(c)
+
     
     # f = plt.Figure()
     # fig, ax = plt.subplots(1, 1)
     # ax = fig.add_subplot(111, projection='3d')
     # display_graph([path+file1, path+file2], ax, mnn = None, deg = 0, percentage_threshold = 50,
-    #               node_metric = "k-core", mutual = True, idx = [], node_size = 5, edge_width = 2,
-    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None)
+    #               node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2,
+    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True)
     # plt.show()
     
-    # fig, ax = plt.subplots(1, 1)
-    # root = tk.Tk()
-    # root.resizable(width=True, height=True)
-    # root.title("Multilayer graph analysis")
-    # display_animation([path+file1, path+file2, path+file3, path+file4], root,  mnn = None, deg = 0, 
-    #                   percentage_threshold = 50, layout = "circle",
-    #               node_metric = "k-core", mutual = True, idx = [], node_size = 50, edge_width = 2,
-    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None)
-    # root.mainloop()
+    fig, ax = plt.subplots(1, 1)
+    root = tk.Tk()
+    root.resizable(width=True, height=True)
+    root.title("Multilayer graph analysis")
+    display_animation([path+file1, path+file2, path+file3, path+file4], root,  mnn = 3, deg = 0, 
+                      percentage_threshold = 50, layout = "circle",
+                  node_metric = "strength", mutual = True, idx = [], node_size = 50, edge_width = 2,
+                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, node_labels = True,
+                  node_cmap = cm.coolwarm, edge_cmap = cm.Greys)
+    root.mainloop()
 
     
     # plt.show()

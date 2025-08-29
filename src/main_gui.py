@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
-import tkinter.font as tkFont
-from pprint import pprint
+# import tkinter.font as tkFont
+# from pprint import pprint
 import webbrowser
 from tkinter import filedialog
 import matplotlib
@@ -15,24 +15,20 @@ from matplotlib.backends.backend_tkagg import *
 from matplotlib.figure import Figure
 import os
 from read_graph import *
-from clustering_window import *
+# from clustering_window import *
 from settings_window import settingsWindow
 from listbox_selection import MultiSelectDropdown
-import threading
-import gc
+from tooltip import ToolTip
+# import threading
+# import gc
 
 #To-do: 
-#       - give possibility to display names or not
-#       - Remove spectral clustering? make community detection a bit more intuitive, and add more options.
-
 
 #       - Set a default percentage_threshold value that depends on the number of nodes. 
-#       - fix overlapping small white link between nodes that make visualization hard
 #       - remove colorbar from 3D view
 #       - figure out why -1 in nn for mnn
 #       - Check that feedback loops rm works, and that display of distance graphs also works
 #       - mnn in clustering should be fixed (the displayed cut graph isnt cut properly)
-#       - add to settings possibility to change colormaps for layers, base node size, base colors and colormap for edges.
 #       - write tests
 
 ###### For future versions: 
@@ -73,11 +69,17 @@ class App:
         self.histo_type = "stacked"
         self.remove_loops = True # for the app to know if feedback loops should be plotted or not 
         self.edge_thickness_var = tk.StringVar(value = "5") # variable for changing edge type in settings window
-        self.node_thickness_var = tk.StringVar(value = "15") # variable for changing edge type in settings window
+        self.node_thickness_var = tk.StringVar(value = "20") # variable for changing edge type in settings window
         self.animation_speed_var = tk.StringVar(value = "200") # variable for changing the speed of animation
         self.show_histogram_legend = True
         self.scale_edge_width = True # variable for scaling the thickness of edge to their value
         self.between_layer_edges = True
+        self.rm_index = True # if True, remove the first row and column of input file(s), considering them as indexing
+        self.show_node_lb = True # variable for showing the names of the nodes in the graph
+        self.show_planes = False 
+        self.community_algorithm = "louvain"
+        self.edge_cmap = matplotlib.colormaps.get_cmap("Greys")
+        self.node_cmap = "none"
 
         self.color1 = "#E4F8FF"
         self.color2 = "#FFF7E3"
@@ -136,6 +138,7 @@ class App:
         self.plot_selector.place(relx=0.35, rely = origin+distance_between, relheight=0.06)
         self.plot_selector.set("Graph layout")
         self.plot_selector.bind('<<ComboboxSelected>>', self.plot_changed)
+        self.plot_selector_tooltip = ToolTip(self.plot_selector, "Click here to change the spatial organization\n of the nodes within the graph.", 700)
 
         # metric selection for nodes
         metric_label = tk.Label(btn_frame, text = "Metric: ", bg = self.color2)
@@ -145,6 +148,7 @@ class App:
         self.node_metric_selector.place(relx=0.35, rely = origin+2*distance_between, relheight=0.06)
         self.node_metric_selector.set("Node metric")
         self.node_metric_selector.bind('<<ComboboxSelected>>', self.node_changed)
+        self.node_metric_selector_tp = ToolTip(self.node_metric_selector, "The node metrics are different measurements of the importance\n of the nodes within the graph", 700)
 
         # Graph-cut type selection
         graphcut_label = tk.Label(btn_frame, text = "Graph cut: ", bg = self.color2)
@@ -154,13 +158,15 @@ class App:
         self.graphcut_selector.place(relx=0.35, rely = origin+3*distance_between, relheight=0.06)
         self.graphcut_selector.set("Graph-cut type")
         self.graphcut_selector.bind('<<ComboboxSelected>>', self.graphcut_param_window)
+        self.graphcut_tooltip = ToolTip(self.graphcut_selector, "Click here to prune the edges of the graph(s). Threshold will remove weak edges,\nwhile nearest neighbors based cut only keeps edges between nodes that are functionaly close.", 700)
         
         # Button to open clustering window
-        cluster_button = tk.Button(btn_frame)
-        cluster_button["text"] = "cluster nodes"
-        cluster_button.place(relx=0.2, rely = origin+4*distance_between, relwidth= 0.6, relheight=0.1)
-        cluster_button["command"] = self.cluster_button_command
-                
+        self.cluster_button = tk.Button(btn_frame)
+        self.cluster_button["text"] = "cluster nodes"
+        self.cluster_button.place(relx=0.2, rely = origin+4*distance_between, relwidth= 0.6, relheight=0.1)
+        self.cluster_button["command"] = self.cluster_button_command
+        self.cluster_button_tooltip = ToolTip(self.cluster_button, "Click here to detect communities in the graph(s).\n Nodes that are similar will be colored the same", 700)
+
         # Display type buttons (plot, stats, animation)
         tk.Label(result_display_frame, text="Display type", font = 'Helvetica 12 bold', bg =  self.color3).place(relx = 0.1, rely = 0.1, relwidth=0.8, relheight=0.2)
         self.plot_btn = tk.Button(result_display_frame, text='Graph(s)')
@@ -263,16 +269,17 @@ class App:
             
         display_graph(self.path_to_file, a, percentage_threshold = self.percentage_threshold, mnn = self.mnn_number, mutual = self.mutual, \
                       avg_graph = self.view_type == "avg", affinity = self.edge_type == "affinity",  rm_fb_loops = self.remove_loops, \
-                      layout = self.layout_style, node_metric = self.node_metric, \
+                      layout = self.layout_style, node_metric = self.node_metric, rm_index = self.rm_index, \
                       idx = self.idx, cluster_num = self.cluster_num, layer_labels=self.path_to_file, deg = self.degree,
                       edge_width = int(self.edge_thickness_var.get()), node_size = int(self.node_thickness_var.get()), 
-                      scale_edge_width = self.scale_edge_width, between_layer_edges = self.between_layer_edges)
+                      scale_edge_width = self.scale_edge_width, between_layer_edges = self.between_layer_edges,
+                      node_labels = self.show_node_lb, show_planes = self.show_planes, edge_cmap = self.edge_cmap, 
+                      node_cmap = self.node_cmap)
             
-        if self.scale_edge_width:
-            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Greys), ax=a, label="Normalized edge value", shrink = 0.3, location = 'right', pad = 0.1)
-        if self.node_metric != "none":
-            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
-            # f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.viridis), ax=a, label="Relative edge value", shrink = 0.3, location = 'right', pad = 0.1)
+
+        f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.edge_cmap), ax=a, label="Normalized edge value", shrink = 0.3, location = 'right', pad = 0.1)
+        if self.node_metric != "none" and self.node_cmap != "none":
+            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.node_cmap), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
         else: # to keep layout consistent across changes of settings
             cb = f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
             cb.remove()
@@ -295,7 +302,7 @@ class App:
         px = 1/plt.rcParams['figure.dpi']  # pixel in inches
         f = Figure(figsize=(800*px,400*px), dpi = 100)
         a = f.add_subplot(111)
-        display_stats(self.path_to_file, a, percentage_threshold=self.percentage_threshold, 
+        display_stats(self.path_to_file, a, percentage_threshold=self.percentage_threshold, rm_index = self.rm_index,
                       affinity = self.edge_type == "affinity", mnn = self.mnn_number, mutual = self.mutual, 
                       node_metric = self.node_metric, avg_graph = self.view_type == "avg",
                       stacked = self.histo_type == "stacked", deg = self.degree, show_legend = self.show_histogram_legend)
@@ -312,14 +319,23 @@ class App:
             fm.destroy()
             root.update()
 
-        display_animation(self.path_to_file, self.content_frame, percentage_threshold = self.percentage_threshold, mnn = self.mnn_number,
+        f, a = display_animation(self.path_to_file, self.content_frame, percentage_threshold = self.percentage_threshold, mnn = self.mnn_number,
                       mutual = self.mutual, avg_graph = self.view_type == "avg", affinity = self.edge_type == "affinity",
-                      rm_fb_loops = self.remove_loops, layout = self.layout_style, node_metric = self.node_metric, 
+                      rm_fb_loops = self.remove_loops, rm_index = self.rm_index, layout = self.layout_style, node_metric = self.node_metric, 
                       idx = self.idx, cluster_num = self.cluster_num, layer_labels=self.path_to_file, deg = self.degree,
-                      edge_width = int(self.edge_thickness_var.get()), node_size = int(self.node_thickness_var.get()), 
+                      edge_width = int(self.edge_thickness_var.get()), node_size = 2*int(self.node_thickness_var.get()), 
                       scale_edge_width = self.scale_edge_width, between_layer_edges = self.between_layer_edges, 
-                      interframe = int(self.animation_speed_var.get()))
-
+                      interframe = int(self.animation_speed_var.get()), node_labels = self.show_node_lb,
+                      node_cmap = self.node_cmap, edge_cmap = self.edge_cmap)
+        
+        if self.scale_edge_width:
+            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.edge_cmap), ax=a, label="Normalized edge value", shrink = 0.3, location = 'right', pad = 0.1)
+        if self.node_metric != "none" and self.node_cmap != "none":
+            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.node_cmap), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
+        else: # to keep layout consistent across changes of settings
+            cb = f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
+            cb.remove()
+    
     def graphcut_param_window(self, event):
         """
         Prompt for selecting the parameter for graph cut, i.e. removal of edges.
@@ -333,6 +349,7 @@ class App:
             up to the 2nd nearest neighbors, 3 means up to the 3rd nearest neighbor etc.
         """
         if self.graphcut_selector.get() == "none":
+            self.idx = [] # resets results of clustering as they will not be relevant after graph cut anymore
             self.percentage_threshold = 0.0
             self.mnn_number = None
             if self.display_type == "plot":
@@ -356,8 +373,10 @@ class App:
             self.graphcut_entry.insert(0, mnn)
         tk.Button(self.new_window, text="Cut!", command=self.graph_cut_changed).grid(row=2,column=0)
         tk.Label(self.new_window, text="Enter " + self.graphcut_selector.get()).grid(row=0,column=0)
+        self.graphcut_entry.bind("<Return>", lambda event: self.graph_cut_changed())
 
     def graph_cut_changed(self):
+        self.idx = [] # resets results of clustering as they will not be relevant after graph cut anymore
         if self.graphcut_selector.get() == "threshold":
             self.mnn_number = None
             self.percentage_threshold = float(self.graphcut_entry.get())
@@ -449,28 +468,18 @@ class App:
             self.animation_in_frame()
 
     def cluster_button_command(self):
-        self.clustertype_wdw = tk.Toplevel(root)
-        self.clustertype_wdw.geometry("250x250")
-        self.clustertype_wdw.title("Clustering type")
-        unsupervised_button = tk.Button(self.clustertype_wdw, text="Unsupervised")
-        unsupervised_button.pack(side="left")
-        unsupervised_button["command"] = self.unsupervised_button
-        supervised_button = tk.Button(self.clustertype_wdw, text="Supervised")
-        supervised_button.pack(side="left")
-        supervised_button["command"] = self.supervised_button
+        if len(self.active_path_list) == 0:
+            return
         
-    def supervised_button(self):
-        SpectralClustWindow(root, self, self.path_to_file)
-        self.clustertype_wdw.destroy()
-        
-    def unsupervised_button(self):
-        self.idx = community_clustering(self.path_to_file, mnn = self.mnn_number, 
+        self.idx = community_clustering(self.path_to_file, algorithm = self.community_algorithm, mnn = self.mnn_number, 
                                         percentage_threshold=self.percentage_threshold, 
                                         mutual = self.mutual, affinity = self.edge_type == "affinity")
-        print(self.idx)
         self.cluster_num = max(self.idx)+1
-        self.clustertype_wdw.destroy()
-        self.plot_in_frame()
+        if self.display_type == "animation":
+            self.animation_in_frame()
+        else:
+            self.plot_in_frame()
+        
 
 if __name__ == "__main__":
     root = tk.Tk()

@@ -30,7 +30,9 @@ class GraphAnimator:
             self.parent_frame = parent_frame
         self.setup_ui()
         self.play_animation()
-
+    
+    def get_fig(self):
+        return self.fig, self.ax
         
     def setup_ui(self):
         """Set up the matplotlib figure and widgets"""
