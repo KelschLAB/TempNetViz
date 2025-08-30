@@ -8,11 +8,16 @@ from matplotlib import cm
 from matplotlib.colors import LinearSegmentedColormap, Normalize
 from igraph.drawing.colors import ClusterColoringPalette
 import random
-import os
+import os, sys
 from copy import copy
 from warnings import warn
 from tkinter import messagebox as mb
-# from clustering_algorithm import *
+
+if __name__ == "__main__" and __package__ is None:
+    # Go up one level to the package root
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+    __package__ = "tempgraphviz"
+    
 from .multilayer_plot import *
 from .graph_animation import *
 import pandas as pd
@@ -1042,7 +1047,7 @@ def display_animation(path_to_file, parent_frame = None, percentage_threshold = 
         if "scale_edge_width" in kwargs and kwargs["scale_edge_width"]:
             g_edge_width = rescale(np.array([e['weight'] for e in layers[i].es()]), default_edge_width)
             visual_style["edge_width"] = g_edge_width
-        edge_color = [edge_cmap(edge) for edge in rescale(np.array([w['weight'] for w in g.es])) - 0.01]
+        edge_color = [edge_cmap(edge) for edge in rescale(np.array([w['weight'] for w in layers[i].es]), 1) - 0.01]
         visual_style["edge_color"] = edge_color
 
         styles.append(visual_style)
@@ -1065,7 +1070,7 @@ if __name__ == '__main__':
     # file3 = "interactions_resD1_3.csv"
     # file4 = "interactions_resD1_2.csv"
     
-    path = "..\\data\\random_graph\\"
+    path = "..\\..\\data\\random_graph\\"
     file1 = "rand_graph1.csv"
     file2 = "rand_graph2.csv"
     file3 = "rand_graph3.csv"
@@ -1098,7 +1103,7 @@ if __name__ == '__main__':
                       percentage_threshold = 50, layout = "circle",
                   node_metric = "strength", mutual = True, idx = [], node_size = 50, edge_width = 2,
                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, node_labels = True,
-                  node_cmap = cm.coolwarm, edge_cmap = cm.Greys)
+                  node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm)
     root.mainloop()
 
     

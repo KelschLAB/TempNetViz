@@ -25,7 +25,6 @@ from tempgraphviz.settings_window import settingsWindow
 from tempgraphviz.listbox_selection import MultiSelectDropdown
 from tempgraphviz.tooltip import ToolTip
 
-
 #To-do: 
 #       - !!!!!color of the edges in animation with colormaps does not reflect width!!!!!
 #       - Set a default percentage_threshold value that depends on the number of nodes. 
