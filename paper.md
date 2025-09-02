@@ -70,7 +70,12 @@ This entirely discards the information of structure, to make evolution of the da
 ![Fig. 3: Example of stacked histogram representation. Color indicates time steps, from deep blue (first time step) to deep red (last time step). In this example, we see that the largest strength values (>1500) are only observed at later timesteps, indicating an overall increase in activity towards the end of the experiment.](histo_view.png){ width=50% }
 
 # Research application
-TempNetViz was used 
+TempNetViz was used to study the formation of stable cliques (called rich-clubs) in mouse societies [CITE]. In this article, it has been found that in groups of mice that evolving in a semi-naturalistic environments, highly social and stable cliques tend to form.
+Moreover, it was found that mice that having impaired cortical oxytocin signaling were not able to enter such stable rich-clubs, preserved overall social motivation. These findings helped to underscore the role of oxytocin in tuning sensory systems into a social processing state. 
+In Fig. 4, we show how the main finding of this article can be seen using TempNetViz. In this example, we first prune the graph and retain only the edges between mutual nearest neighbors of 3rd order (graph-cut in TempGraphViz). Then, the nodes which are part of the rich club are displayed (rich-club metric in TempGraphViz). 
+Nodes which are consistently part of the rich club for at least 4 out of 5 time steps are considered part of the stable rich club.
+![Fig. 4: Example of stable rich club observation.](src_example.png){ width=50% }
+
 
 # Acknowledgement
 The work was funded by BMBF 3R consortium grants ‘NoSeMaze1’ (161L0277A) and ‘NoSeMaze2’ (16LW0333K) to W.K., Leibniz Association program grant ‘Learning resilience’ (K430/2021) to W.K., 
