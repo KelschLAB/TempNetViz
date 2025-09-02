@@ -266,6 +266,8 @@ class App:
             self.percentage_threshold = 40
         elif data.shape[0] > 20:
             self.percentage_threshold = 30
+        else:
+            return
         self.graphcut_selector.set("threshold")
         tk.messagebox.showinfo(self, f"An automatic threshold of {self.percentage_threshold}% was applied to improve visibility.\nTo change this, use the 'graph cut' menu to input the desired settings.")
                 

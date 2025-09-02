@@ -40,11 +40,19 @@ Leveraging the strength of the existing dependencies also requires some coding e
 To address these limitations, we developed, we developped TempNetViz to provide and accessible and user-friendly way to visualize temporal graphs.
 
 # Key features
-Showcase the key features of the GUI
+The main advantage of TempNetViz is to allow the user to switch effortlessly between different representations of the data. Once the analysis parameters have been chosen (for details, see the [documentation]), there are 4 possible ways of display:
 
-# Related software
-cite existing softwares and GUI for graph visualization
- [@igraph] 
+## Multi-layer representation
+In this representation, each timestep is displayed as an individual graph within a layer and the layers corresponding to the different time steps are stacked on top of each other, from bottom to top. 
+The result is displayed in 3 dimensions (see Fig. 1) and can be rotate with the mouse to show different parts of the multi-layer graph.
+
+![Fig. 1: Example of multi-layer representation for temporal graphs using TempNetViz](../figures/3D_view.png){ width=20% }
+
+## Animation
+
+## Temporal layout
+
+## Histogram
 
 # Research application
 Cite sRC paper here, and show how we can observe the sRC with the GUI.
@@ -55,9 +63,9 @@ and referenced from text using \autoref{fig:example}.
 Figure sizes can be customized by adding an optional second parameter:
 ![Caption for example figure.](figure.png){ width=20% }
 
-# Acknowledgements
-
-We acknowledge contributions from ...
+# Related software
+cite existing softwares and GUI for graph visualization
+ [@igraph] 
 
 # References
 
