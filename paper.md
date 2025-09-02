@@ -46,7 +46,7 @@ The main advantage of TempNetViz is to allow the user to switch effortlessly bet
 In this representation, each timestep is displayed as an individual graph within a layer and the layers corresponding to the different time steps are stacked on top of each other, from bottom to top. 
 The result is displayed in 3 dimensions (see Fig. 1) and can be rotate with the mouse to show different parts of the multi-layer graph.
 
-![Fig. 1: Example of multi-layer representation for temporal graphs using TempNetViz](../figures/3D_view.png){ width=20% }
+![Fig. 1: Example of multi-layer representation for temporal graphs using TempNetViz](3D_view.png){ width=20% }
 
 ## Animation
 
