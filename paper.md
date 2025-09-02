@@ -28,15 +28,16 @@ The field is intrinsically multidisciplinary, drawing upon diverse methodologies
 This methodological diversity, can pose significant challenges for researchers, particularly at the stage of initial data exploration.
 In this context, effective visualization is needed to provide an intuitive entry point into the data and help guide subsequent analytical decisions. 
 To this aim, we developped TempNetViz to visualize temporal network data, support early-stage exploration and highlight potential structural and temporal patterns. Particular attention was given to ease of usability, to make data exploration as intuitive as possible.
-
+TempNetViz was build using igraph and networkx, two of the most popular graph visualization packages in Python [CITE] [CITE].
 
 # Statement of need
 There are, To the best of our knowledge, no available graphical user interfaces (GUIs) designed specifically for the interactive visualization of temporal graphs. 
-Although some established graph visualization GUIs provide ways for displaying temporal networks, they were not tailored for this purpose. The available features are therefore limited and rely on specialized internal data formats or external plugins. 
+Although some established graph visualization GUIs provide ways for displaying temporal networks [CITE] [CITE], they were not tailored for this purpose. The available features are therefore limited and rely on specialized internal data formats or external plugins. 
 This represents a substantial learning barrier that must be overcome before any analysis can be conducted. Moreover, it makes systematic comparison across different data representations impossible.
 
-
-Researchers in these domains often lack extensive programming experience, making it difficult for them to use existing tools, which are typically code-based and require specialized technical knowledge. As a result, valuable insights can remain inaccessible without more user-friendly, visual approaches to temporal graph analysis.
+While numerous Python packages for temporal graph analysis are available [CITE][CITE][CITE], they either offer limited visualization capabilities or are more oriented towards modeling and classification. 
+Leveraging the strength of the existing dependencies also requires some coding expertise, which can represent a significant obstacle for researchers lacking extensive programming experience. 
+To address these limitations, we developed, we developped TempNetViz to provide and accessible and user-friendly way to visualize temporal graphs.
 
 # Key features
 Showcase the key features of the GUI
@@ -60,9 +61,13 @@ We acknowledge contributions from ...
 
 # References
 
+igraph 
+
+networkx
+
 Bastian, M., Heymann, S., & Jacomy, M. (2009, March). Gephi: an open source software for exploring and manipulating networks. In Proceedings of the international AAAI conference on web and social media (Vol. 3, No. 1, pp. 361-362).
 
-Timenexus
+Cytoscape + Timenexus
 
 
 
