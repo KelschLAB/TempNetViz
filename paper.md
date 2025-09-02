@@ -19,10 +19,9 @@ bibliography: paper.bib
 # Summary
 
 Temporal network analysis is a growing area of research focused on understanding how graphs evolve over time. Graphs can be used to represent a broad variety of systems, and are thus commmonly used in wide array of scientific fields such as neuroscience, biology, sociology and natural language processing. 
-However, most systems under study are not static, and just as the structure of a graph can be of key importance, so can its time evolution. Temporal network analysis  As an inherently multidisciplinary field, it draws on diverse methodologies, which can make initial exploration and comparison difficult due to the absence of standardized conventions.
-In this context, effective visualization plays a crucial role by providing an accessible and intuitive entry point into the data. It supports early-stage exploration, highlights structural and temporal patterns, and helps guide subsequent analytical decisions.
-
-applicaton range from information propagation in social networks, brain connectivity patterns in computational neuroscience or even fraud detection in finance.
+However, most systems under study are not static, and just as the structure of a graph can be of key importance, so can its time evolution. Temporal network analysis aims to study both structure and time variation simulatneously, in order to understand the interplay between these fundamental aspects.
+As an inherently multidisciplinary field, it draws on diverse methodologies, multiple mathematical frameworks and data representation. This diversity can make initial exploration and comparison difficult due to the absence of standardized conventions.
+In this context, effective visualization is needed to provide an intuitive entry point into the data and help guide subsequent analytical decisions. To this aim, we developped TempNetViz to visualize temporal betwork data, support early-stage exploration and highlight potential structural and temporal patterns.
 
 # Statement of need
 Currently, there are no (**DOUBLE CHECK**) widely available graphical user interfaces (GUIs) designed specifically for the interactive exploration and analysis of temporal graphs. This presents a significant barrier, particularly in fields such as biology and the social sciences, where temporal networks are commonly encountered. 
