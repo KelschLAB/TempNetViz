@@ -233,9 +233,12 @@ class LayeredNetworkGraph(object):
         #     self.ax.text(-1, -1, z, os.path.basename(layer_label))
 
     def draw_node_labels(self, node_labels, *args, **kwargs):
+        x, y = self.get_extent(0)
+        offset_x, offset_y = x[1], y[1]
         for node, z in self.nodes:
             if z == 0:
-                self.ax.text(*self.node_positions[(node, z)], node_labels[node], *args, **kwargs)
+                x, y = self.node_positions[(node, z)][0], self.node_positions[(node, z)][1]
+                self.ax.text(x+0.15*offset_x, y+0.15*offset_y, 0, node_labels[node], *args, **kwargs)
 
     def draw(self):
         self.draw_edges(self.edges_within_layers, arrow = True, alpha=0.7, linestyle='-', zorder=2

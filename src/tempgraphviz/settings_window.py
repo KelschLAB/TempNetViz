@@ -192,6 +192,13 @@ class settingsWindow(tk.Toplevel):
             sbs_button.config(command=lambda: None)
             sbs_button.invoke()
             sbs_button.config(command=original_command)
+            
+        tk.Label(tab3, text="Number of bins:").grid(row=3, column=1)
+        self.bins_var = tk.StringVar() 
+        self.bins_entry = tk.Entry(tab3, textvariable=self.bins_var)
+        self.bins_entry.insert(0, self.app.num_bins)
+        self.bins_entry.bind('<Return>', lambda event: self.on_enter_pressed_hist(event))
+        self.bins_entry.grid(row=3, column=2)
 
 ## 4th tab: animation options   
         tk.Label(tab4, text="Time between frames (ms):").grid(row=1, column=1)
@@ -224,6 +231,11 @@ class settingsWindow(tk.Toplevel):
         self.app.edge_thickness_var.set(edge_thickness_value)
         self.app.node_thickness_var.set(node_thickness_value)
         self.app.animation_speed_var.set(animation_speed_value)
+        self.redraw()
+        
+    def on_enter_pressed_hist(self, event):
+        bins_value = self.bins_entry.get()  
+        self.app.num_bins = int(bins_value)
         self.redraw()
         
     def switch_edge_type(self):

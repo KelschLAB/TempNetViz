@@ -26,11 +26,8 @@ from tempgraphviz.listbox_selection import MultiSelectDropdown
 from tempgraphviz.tooltip import ToolTip
 
 #To-do: 
-#       - !!!!!color of the edges in animation with colormaps does not reflect width!!!!!
-#       - Set a default percentage_threshold value that depends on the number of nodes. 
-#       - figure out why -1 in nn for mnn
-#       - Check that feedback loops rm works, and that display of distance graphs also works
-#       - mnn in clustering should be fixed (the displayed cut graph isnt cut properly)
+#       - include link of doc once online in the GUI (setting/ help section)
+#       - make sure that the "Run" instruction in documentation actually works
 #       - write tests
 
 ###### For future versions: 
@@ -82,6 +79,7 @@ class App:
         self.community_algorithm = "louvain"
         self.edge_cmap = matplotlib.colormaps.get_cmap("Greys")
         self.node_cmap = "none"
+        self.num_bins = 10 # number of bins for the histograms
 
         self.color1 = "#E4F8FF"
         self.color2 = "#FFF7E3"
@@ -202,6 +200,8 @@ class App:
         self.dirpath = filedialog.askdirectory(title="Select the directory/folder which contains the graph file(s)")
         self.path_variable_list = []
         self.path_label_list = []
+        if len(self.dirpath) == 0:
+            return
         path_list = [p for p in os.listdir(self.dirpath) if p.endswith(".csv")]
         self.path_list = path_list
         self.graph_selector.choices = self.path_list
@@ -213,6 +213,7 @@ class App:
         lst = [self.graph_selector.listbox.get(i) for i in self.graph_selector.listbox.curselection()]
         self.active_path_list = lst
         self.path_to_file = [self.dirpath + "/" + self.active_path_list[i] for i in range(len(self.active_path_list))]   
+        self.automatic_threshold([self.path_to_file[0]])
         if self.display_type == "plot":
             self.plot_in_frame()
         elif self.display_type == "stats":
@@ -250,6 +251,23 @@ class App:
         B2 = ttk.Button(popup, text="No", command = popup.destroy)
         B2.pack(side="left")
         
+    def automatic_threshold(self, path):
+        data = read_graph(path)[0]
+        if data.shape[0] > 70:
+            self.percentage_threshold = 80
+        if data.shape[0] > 60:
+            self.percentage_threshold = 70
+        elif data.shape[0] > 50:
+            self.percentage_threshold = 60
+        elif data.shape[0] > 40:
+            self.percentage_threshold = 50 
+        elif data.shape[0] > 30:
+            self.percentage_threshold = 40
+        elif data.shape[0] > 20:
+            self.percentage_threshold = 30
+        self.graphcut_selector.set("threshold")
+        tk.messagebox.showinfo(self, f"An automatic threshold of {self.percentage_threshold}% was applied to improve visibility.\nTo change this, use the 'graph cut' menu to input the desired settings.")
+                
     def settings_window(self):
         settingsWindow(root, self) # creates a settings window
          
@@ -312,7 +330,7 @@ class App:
         display_stats(self.path_to_file, a, percentage_threshold=self.percentage_threshold, rm_index = self.rm_index,
                       affinity = self.edge_type == "affinity", mnn = self.mnn_number, mutual = self.mutual, 
                       node_metric = self.node_metric, avg_graph = self.view_type == "avg",
-                      stacked = self.histo_type == "stacked", deg = self.degree, show_legend = self.show_histogram_legend)
+                      stacked = self.histo_type == "stacked", deg = self.degree, show_legend = self.show_histogram_legend, bins = self.num_bins)
         
         canvas = FigureCanvasTkAgg(f, master=self.content_frame)
         NavigationToolbar2Tk(canvas, self.content_frame)
@@ -375,17 +393,32 @@ class App:
         
         self.new_window = tk.Toplevel(root)
         self.new_window.title("Enter Parameter Value")
-        tk.Label(self.new_window, text="Enter " + self.graphcut_selector.get()).grid(row=0,column=0)
+        
+        # center window
+        self.new_window.geometry("200x100")
+        self.new_window.update_idletasks()
+        root.update_idletasks()
+        root_x = root.winfo_rootx()
+        root_y = root.winfo_rooty()
+        root_w = root.winfo_width()
+        root_h = root.winfo_height()
+        win_w = self.new_window.winfo_width()
+        win_h = self.new_window.winfo_height()
+        x = root_x + (root_w // 2 - win_w // 2)
+        y = root_y + (root_h // 2 - win_h // 2)
+        self.new_window.geometry(f"{win_w}x{win_h}+{x}+{y}")
+        
+        tk.Label(self.new_window, text="Enter " + self.graphcut_selector.get()).grid(row=0,column=0, padx = 15)
         self.graphcut_entry = tk.Entry(self.new_window)
-        self.graphcut_entry.grid(row=1,column=0)
+        self.graphcut_entry.grid(row=1,column=0, padx = 15)
         if self.graphcut_selector.get() == "threshold":
             self.graphcut_entry.insert(0, str(self.percentage_threshold))
             tk.Label(self.new_window, text="%").grid(row=1,column=1)
         elif self.graphcut_selector.get() == "mutual nearest neighbors" or self.graphcut_selector.get() == "nearest neighbors":
             mnn = str(self.mnn_number) if self.mnn_number is not None else ""
             self.graphcut_entry.insert(0, mnn)
-        tk.Button(self.new_window, text="Cut!", command=self.graph_cut_changed).grid(row=2,column=0)
-        tk.Label(self.new_window, text="Enter " + self.graphcut_selector.get()).grid(row=0,column=0)
+        tk.Button(self.new_window, text="Cut!", command=self.graph_cut_changed).grid(row=2,column=0, padx = 15)
+        # tk.Label(self.new_window, text="Enter " + self.graphcut_selector.get()).grid(row=0,column=, padx = 70)
         self.graphcut_entry.bind("<Return>", lambda event: self.graph_cut_changed())
 
     def graph_cut_changed(self):
@@ -444,24 +477,67 @@ class App:
     def rich_club_window(self):
         self.new_window = tk.Toplevel(root)
         self.new_window.title("Degree value for rich-club")
-        tk.Label(self.new_window, text="Enter degree").grid(row=0,column=0)
-        self.rich_club_entry = tk.Entry(self.new_window)
-        self.rich_club_entry.grid(row=1,column=0)
-        tk.Button(self.new_window, text="Compute rich-club!", command=self.rich_club_changed).grid(row=2,column=0)
+        self.new_window.grab_set()
+
+        self.new_window.geometry("200x100")
+        self.new_window.update_idletasks()
+        root.update_idletasks()
+        root_x = root.winfo_rootx()
+        root_y = root.winfo_rooty()
+        root_w = root.winfo_width()
+        root_h = root.winfo_height()
+        win_w = self.new_window.winfo_width()
+        win_h = self.new_window.winfo_height()
+        x = root_x + (root_w // 2 - win_w // 2)
+        y = root_y + (root_h // 2 - win_h // 2)
+        self.new_window.geometry(f"{win_w}x{win_h}+{x}+{y}")
         
+        tk.Label(self.new_window, text="Enter degree:").pack(pady=(5, 2))
+        self.rich_club_entry = tk.Entry(self.new_window)
+        self.rich_club_entry.pack(pady=(2, 5))
+        tk.Button(self.new_window, text="Compute rich-club!", command=self.rich_club_changed).pack(pady=(0, 3))
+        self.rich_club_entry.bind("<Return>", lambda event: self.rich_club_changed())
+
     def k_core_window(self):
         self.new_window = tk.Toplevel(root)
         self.new_window.title("Degree value for k-core")
-        tk.Label(self.new_window, text="Enter degree").grid(row=0,column=0)
-        self.rich_club_entry = tk.Entry(self.new_window)
-        self.rich_club_entry.grid(row=1,column=0)
-        tk.Button(self.new_window, text="Compute k-core!", command=self.rich_club_changed).grid(row=2,column=0)
         
+        self.new_window.geometry("200x100")
+        self.new_window.update_idletasks()
+        root.update_idletasks()
+        root_x = root.winfo_rootx()
+        root_y = root.winfo_rooty()
+        root_w = root.winfo_width()
+        root_h = root.winfo_height()
+        win_w = self.new_window.winfo_width()
+        win_h = self.new_window.winfo_height()
+        x = root_x + (root_w // 2 - win_w // 2)
+        y = root_y + (root_h // 2 - win_h // 2)
+        self.new_window.geometry(f"{win_w}x{win_h}+{x}+{y}")
+        
+        tk.Label(self.new_window, text="Enter degree").grid(row=0,column=0)
+        self.kcore_entry = tk.Entry(self.new_window)
+        self.kcore_entry.grid(row=1,column=0)
+        tk.Button(self.new_window, text="Compute k-core!", command=self.rich_club_changed).grid(row=2,column=0)
+        self.kcore_entry.bind("<Return>", lambda event: self.kcore_changed())
+
+    def kcore_changed(self):
+        self.degree = int(self.kcore_entry.get())
+        self.new_window.destroy()
+        if self.display_type == "plot":
+            self.plot_in_frame()
+        elif self.display_type == "animation":
+            self.animation_in_frame()
+        else:
+            self.stats_in_frame()        
+
     def rich_club_changed(self):
         self.degree = int(self.rich_club_entry.get())
         self.new_window.destroy()
         if self.display_type == "plot":
             self.plot_in_frame()
+        elif self.display_type == "animation":
+            self.animation_in_frame()
         else:
             self.stats_in_frame()
         
@@ -469,9 +545,11 @@ class App:
         self.node_metric = self.node_metric_selector.get()
         if self.node_metric == "rich-club":
             self.rich_club_window()
+            return
             
         if self.node_metric == "k-core":
             self.k_core_window()
+            return
             
         if self.display_type == "plot":
             self.plot_in_frame()

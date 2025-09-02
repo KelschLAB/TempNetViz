@@ -1,5 +1,5 @@
 ---
-title: 'TGV: a GUI for temporal graphs visualization'
+title: 'TempNetViz: a GUI for temporal graphs visualization'
 tags:
   - Python
   - Temporal graphs
@@ -18,8 +18,11 @@ bibliography: paper.bib
 
 # Summary
 
-Temporal graph analysis is a growing area of research focused on understanding how networks evolve over time. As an inherently multidisciplinary field, it draws on diverse methodologies, which can make initial exploration and comparison difficult due to the absence of standardized conventions.
+Temporal network analysis is a growing area of research focused on understanding how graphs evolve over time. Graphs can be used to represent a broad variety of systems, and are thus commmonly used in wide array of scientific fields such as neuroscience, biology, sociology and natural language processing. 
+However, most systems under study are not static, and just as the structure of a graph can be of key importance, so can its time evolution. Temporal network analysis  As an inherently multidisciplinary field, it draws on diverse methodologies, which can make initial exploration and comparison difficult due to the absence of standardized conventions.
 In this context, effective visualization plays a crucial role by providing an accessible and intuitive entry point into the data. It supports early-stage exploration, highlights structural and temporal patterns, and helps guide subsequent analytical decisions.
+
+applicaton range from information propagation in social networks, brain connectivity patterns in computational neuroscience or even fraud detection in finance.
 
 # Statement of need
 Currently, there are no (**DOUBLE CHECK**) widely available graphical user interfaces (GUIs) designed specifically for the interactive exploration and analysis of temporal graphs. This presents a significant barrier, particularly in fields such as biology and the social sciences, where temporal networks are commonly encountered. 

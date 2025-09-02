@@ -436,7 +436,12 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
     else:
         layout_style = "fr"
         
-    node_labels = read_labels(path_to_file) if ("node_labels" in kwargs and kwargs["node_labels"]) else None
+    if rm_index == False and ("node_labels" in kwargs and kwargs["node_labels"]):
+        node_labels = [str(i) for i in range(len(read_labels(path_to_file)))] 
+    elif ("node_labels" in kwargs and kwargs["node_labels"]):
+        node_labels = read_labels(path_to_file) 
+    else:
+        node_labels = None
         
     if len(path_to_file) > 1 and not avg_graph:
         layer_labels = kwargs["layer_labels"] if "layer_labels" in kwargs else None
@@ -562,7 +567,7 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
     visual_style["vertex_frame_width"] = 3
     visual_style["vertex_label"] = node_labels
     g.vs["name"] = node_labels
-
+    visual_style["vertex_label_dist"] = 5  # Adjust this value as needed
     visual_style["vertex_font"] = "Times"
     ig.plot(g, target=ax, **visual_style)
     
@@ -723,7 +728,7 @@ def display_graph_3d(path_to_file, ax, percentage_threshold = 0.0, mnn = None, a
 
     
 def display_stats(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affinity = True, avg_graph = False,
-                  mutual = True, node_metric = "none", stacked = True, rm_index = True, **kwargs):
+                  mutual = True, node_metric = "none", stacked = True, rm_index = True, bins = 10, **kwargs):
     """
     This function displays a histogram representation of the metrics of the graph to analyze.
 
@@ -751,7 +756,7 @@ def display_stats(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affi
         display_stats_multilayer(path_to_file, ax, percentage_threshold, mnn, affinity, mutual,
                                  node_metric = node_metric, deg = kwargs["deg"],
                                  stacked = stacked, show_legend = kwargs["show_legend"],
-                                 rm_index = rm_index)
+                                 rm_index = rm_index, bins = bins)
         return
     else:
         data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, affinity = affinity, 
@@ -820,7 +825,7 @@ def display_stats(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affi
 
             
 def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affinity = True, mutual = True,
-                             node_metric = "none",stacked = True, rm_index = True, **kwargs):
+                             node_metric = "none",stacked = True, rm_index = True, bins = 10, **kwargs):
     """
     This function displays a histogram representation of the metrics of the graphs to analyze.
 
@@ -847,6 +852,7 @@ def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn =
                       mutual = mutual, rm_index = rm_index)
     graph_data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn,
                             affinity = affinity, mutual = mutual, return_ig = True, rm_index = rm_index)
+    cm = matplotlib.colormaps.get_cmap("coolwarm")
 
     if node_metric == "none":
         node_size = []
@@ -859,11 +865,13 @@ def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn =
         for g in graph_data:
             edge_betweenness = g.betweenness(weights = [1/(e['weight']) for e in g.es()]) #taking the inverse of edge values as we want high score to represent low distances
             node_size.append(np.array(edge_betweenness))
+            
     elif node_metric == "strength":
         node_size = []
         for g in graph_data:
             edge_strength = g.strength(weights = [e['weight'] for e in g.es()])
             node_size.append(np.array(edge_strength))
+            
     elif node_metric == "closeness":
         node_size = []
         for g in graph_data:
@@ -898,10 +906,15 @@ def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn =
             node_size.append([core_size])
     else: 
         node_size = []
-        for g in graph_data:
+        for idx, g in enumerate(graph_data):
             edge_strength = [e['weight'] for e in g.es()]
             node_size.append(np.array(edge_strength))
-        ax.hist(node_size, histtype='bar', stacked=stacked, rwidth = 0.8)
+        total_data = []
+        for idx in range(len(graph_data)):
+            total_data.extend(node_size[idx])
+            
+        _, bins_pos = np.histogram(total_data, bins = bins)
+        ax.hist(node_size, histtype='bar', stacked=stacked, rwidth = 0.8, color = colors)
         ax.set_ylabel("Count")
         labels_legend = [os.path.basename(path).split(".")[0] for path in path_to_file]
         ax.legend(labels=labels_legend)
@@ -909,7 +922,14 @@ def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn =
         ax.set_title("No 'node metric' was selected, showing edge values.")
         return
     
-    ax.hist(node_size, histtype='bar', stacked=stacked, rwidth = 0.8)
+    total_data = []
+    for idx in range(len(graph_data)):
+        total_data.extend(node_size[idx])
+        
+    _, bins_pos = np.histogram(total_data, bins = bins)
+    
+    colors = [cm(idx/len(graph_data)) for idx in range(len(graph_data))]
+    ax.hist(node_size, histtype='bar', bins = bins_pos, stacked=stacked, rwidth = 0.8, color = colors)
     ax.set_ylabel("Count")
     labels_legend = [os.path.basename(path).split(".")[0] for path in path_to_file]
     ax.legend(labels=labels_legend)
@@ -931,7 +951,13 @@ def display_animation(path_to_file, parent_frame = None, percentage_threshold = 
     layers_data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=False, affinity = affinity,
                              rm_fb_loops = rm_fb_loops, rm_index = rm_index )
     
-    node_labels = read_labels(path_to_file) if ("node_labels" in kwargs and kwargs["node_labels"]) else None
+    if rm_index == False and ("node_labels" in kwargs and kwargs["node_labels"]):
+        node_labels = [str(i) for i in range(len(read_labels(path_to_file)))] 
+    elif ("node_labels" in kwargs and kwargs["node_labels"]):
+        node_labels = read_labels(path_to_file) 
+    else:
+        node_labels = None
+        
     default_node_size = kwargs["node_size"] if "node_size" in kwargs else 15
     default_edge_width = kwargs["edge_width"] if "edge_width" in kwargs else 5
     node_color = "blue"
@@ -1043,12 +1069,19 @@ def display_animation(path_to_file, parent_frame = None, percentage_threshold = 
         visual_style["vertex_frame_color"] = marker_frame_color
         visual_style["edge_arrow_width"] = rescale(np.array([w['weight'] for w in layers[i].es]), default_edge_width)*(default_edge_width)
         visual_style["vertex_label"] = node_labels
+        visual_style["vertex_label_dist"] = 5  # Adjust this value as needed
 
         if "scale_edge_width" in kwargs and kwargs["scale_edge_width"]:
             g_edge_width = rescale(np.array([e['weight'] for e in layers[i].es()]), default_edge_width)
             visual_style["edge_width"] = g_edge_width
         edge_color = [edge_cmap(edge) for edge in rescale(np.array([w['weight'] for w in layers[i].es]), 1) - 0.01]
         visual_style["edge_color"] = edge_color
+        
+        if isSymmetric(layers_data[i]):
+            visual_style["edge_curved"] = 0.0
+            visual_style["edge_arrow_width"] = rescale(np.array([w['weight'] for w in layers[i].es]), default_edge_width)*0
+        else:
+            visual_style["edge_curved"] = 0.2
 
         styles.append(visual_style)
     
@@ -1064,11 +1097,11 @@ def display_animation(path_to_file, parent_frame = None, percentage_threshold = 
 
 if __name__ == '__main__':
 
-    # path = "..\\data\\nosemaze\\both_cohorts_1days\\G1\\"
-    # file1 = "interactions_resD1_1.csv"
-    # file2 = "interactions_resD1_2.csv"
-    # file3 = "interactions_resD1_3.csv"
-    # file4 = "interactions_resD1_2.csv"
+    # path = "..\\..\\data\\nosemaze\\both_cohorts_1days\\G1\\"
+    # file1 = "interactions_resD1_01.csv"
+    # file2 = "interactions_resD1_02.csv"
+    # file3 = "interactions_resD1_03.csv"
+    # file4 = "interactions_resD1_04.csv"
     
     path = "..\\..\\data\\random_graph\\"
     file1 = "rand_graph1.csv"
@@ -1085,24 +1118,44 @@ if __name__ == '__main__':
     
     # c = community_clustering([path+file1, path+file2, path+file3, path+file4], algorithm = "infomap", mnn = 4, mutual = True, affinity = True)
     # print(c)
-
     
+    
+## 1D plot example     
+    # f = plt.Figure()
+    # fig, ax = plt.subplots(1, 1)
+    # display_graph([path+file1], ax, mnn = None, deg = 0, percentage_threshold = 50,
+    #               node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2,
+    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
+    #               node_labels = False, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.Greens)
+    # plt.show()
+
+## stacked plot example     
     # f = plt.Figure()
     # fig, ax = plt.subplots(1, 1)
     # ax = fig.add_subplot(111, projection='3d')
     # display_graph([path+file1, path+file2], ax, mnn = None, deg = 0, percentage_threshold = 50,
     #               node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2,
-    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True)
+    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
+    #               node_labels = False, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.Greens)
+    # plt.show()
+
+# histogram plot example     
+    # f = plt.Figure()
+    # fig, ax = plt.subplots(1, 1)
+    # display_stats([path+file1, path+file2, path+file3, path+file4], ax, mnn = None, deg = 0, percentage_threshold = 0,
+    #               node_metric = "eigenvector centrality", mutual = True, idx = [], node_size = 5, edge_width = 2, bins = 10,
+    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True, show_legend = False)
     # plt.show()
     
+## animation example  
     fig, ax = plt.subplots(1, 1)
     root = tk.Tk()
     root.resizable(width=True, height=True)
     root.title("Multilayer graph analysis")
-    display_animation([path+file1, path+file2, path+file3, path+file4], root,  mnn = 3, deg = 0, 
+    display_animation([path+file1, path+file2, path+file3, path+file4], root,  mnn = 5, deg = 0, 
                       percentage_threshold = 50, layout = "circle",
                   node_metric = "strength", mutual = True, idx = [], node_size = 50, edge_width = 2,
-                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, node_labels = True,
+                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, node_labels = True, rm_index = False,
                   node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm)
     root.mainloop()
 
