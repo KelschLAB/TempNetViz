@@ -5,14 +5,15 @@ tags:
   - Temporal graphs
 authors:
   - name: Corentin Nelias
+    corresponding: true
     orcid: 0000-0001-6266-5575
-    affiliation: 1, 2
+    affiliation: "1, 2"
   - name: Jonathan R. Reinwald
-  orcid: 0000-0001-9508-3942
-  affiliation: 1, 2
+    orcid: 0000-0001-9508-3942
+    affiliation: "1, 2"
   - name: Wolfgang Kelsch
-      orcid: 0000-0002-3470-8125
-      affiliation: 1, 2
+    orcid: 0000-0002-3470-8125
+    affiliation: "1, 2"
 
 affiliations:
  - name: Dept. of Psychiatry and Psychotherapy, University Medical Center Mainz, Johannes-Gutenberg University, Untere Zahlbacher Strasse 8, 55131 Mainz, Germany
