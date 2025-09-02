@@ -40,19 +40,22 @@ Leveraging the strength of the existing dependencies also requires some coding e
 To address these limitations, we developed, we developped TempNetViz to provide and accessible and user-friendly way to visualize temporal graphs.
 
 # Key features
-The main advantage of TempNetViz is to allow the user to switch effortlessly between different representations of the data. Once the analysis parameters have been chosen (for details, see the [documentation]), there are 4 possible ways of display:
+The main advantage of TempNetViz is to allow the user to switch effortlessly between different representations of the data. Once the analysis parameters have been chosen (for details, see the [documentation]), 
+there are 4 possible ways of displaying the results. Below, we briefly present them and discuss their advantages and drawbacks.
 
-## Multi-layer representation
-In this representation, each timestep is displayed as an individual graph within a layer and the layers corresponding to the different time steps are stacked on top of each other, from bottom to top. 
-The result is displayed in 3 dimensions (see Fig. 1) and can be rotate with the mouse to show different parts of the multi-layer graph.
+The first one, called multi-layer representation, displays each time step as an individual graph within a layer. The layers corresponding to the different time steps are then stacked on top of each other, from bottom to top. 
+The result is displayed in 3 dimensions (see Fig. 1) and can be rotate with the mouse to show different parts of the multi-layer graph. This is perhaps the most complete way of representing the data, but it can become overcrowded when too many timesteps are displayed at once.
 
-![Fig. 1: Example of multi-layer representation for temporal graphs using TempNetViz](3D_view.png){ width=20% }
+![Fig. 1: Example of multi-layer representation for temporal graphs using TempNetViz. The color of the nodes indicate how strongly connected they are to others, from blue (low connectivity) to red (strong connectivity). The same color mapping is applied to edges between node to represent the magnitude of the edge.](3D_view.png)
 
-## Animation
+Another way to show the data is to display the graph associated with each timestep sequentially to create an animation. While this makes the structure less explicit, it makes the observation of the time evolution more intuitive.
+A slider is also provided to allow a finer control over the steps that are being displayed. 
 
-## Temporal layout
+The third way to represent the data is through the so-called temporal layout [CITE]. In this view, the nodes are ordered along the y-axis, and the edges between each nodes are shown at each time step (see Fig. 2). 
+This representation makes the structure of the graph less obvious (no attempt is made at displaying strongly connected nodes closer to each other), but makes it very easy to see global changes of activity in the temporal graph.
 
 ## Histogram
+
 
 # Research application
 Cite sRC paper here, and show how we can observe the sRC with the GUI.
@@ -77,7 +80,7 @@ Bastian, M., Heymann, S., & Jacomy, M. (2009, March). Gephi: an open source soft
 
 Cytoscape + Timenexus
 
-
+Linhares, C. D., Ponciano, J. R., Paiva, J. G. S., Travençolo, B. A., & Rocha, L. E. (2023). Visualisation of structure and processes on temporal networks. In Temporal network theory (pp. 83-105). Cham: Springer International Publishing.
 
 
 # previous version:
