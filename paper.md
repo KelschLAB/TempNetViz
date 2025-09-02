@@ -46,15 +46,18 @@ there are 4 possible ways of displaying the results. Below, we briefly present t
 The first one, called multi-layer representation, displays each time step as an individual graph within a layer. The layers corresponding to the different time steps are then stacked on top of each other, from bottom to top. 
 The result is displayed in 3 dimensions (see Fig. 1) and can be rotate with the mouse to show different parts of the multi-layer graph. This is perhaps the most complete way of representing the data, but it can become overcrowded when too many timesteps are displayed at once.
 
-![Fig. 1: Example of multi-layer representation for temporal graphs using TempNetViz. The color of the nodes indicate how strongly connected they are to others, from blue (low connectivity) to red (strong connectivity). The same color mapping is applied to edges between node to represent the magnitude of the edge.](3D_view.png)
+![Fig. 1: Example of multi-layer representation. The color of the nodes indicate how strongly connected they are to others, from blue (low connectivity) to red (strong connectivity). The same color mapping is applied to edges between node to represent the magnitude of the edge.](3D_view.png){ width=50% }
 
 Another way to show the data is to display the graph associated with each timestep sequentially to create an animation. While this makes the structure less explicit, it makes the observation of the time evolution more intuitive.
 A slider is also provided to allow a finer control over the steps that are being displayed. 
 
 The third way to represent the data is through the so-called temporal layout [CITE]. In this view, the nodes are ordered along the y-axis, and the edges between each nodes are shown at each time step (see Fig. 2). 
-This representation makes the structure of the graph less obvious (no attempt is made at displaying strongly connected nodes closer to each other), but makes it very easy to see global changes of activity in the temporal graph.
+![Fig. 2: Example of temporal layout.](placeholder.png){ width=50% }
 
-## Histogram
+This representation makes the structure of the graph less obvious (no attempt is made at displaying strongly connected nodes closer to each other), but makes it very easy to see global changes of activity in the temporal graph.
+Finally, TempNetViz also gives the possibility to plot the values of various graph descriptors (see metric section in the [documentation]) as a function of time via stacked histograms. 
+This entirely discards the information of structure, to make the global evolution of the data more explicit (see Fig. 3).
+![Fig. 3: Example of stacked histogram representation. Color indicates time steps, from deep blue (first time step) to deep red (last time step). In this example, we see that the largest strength values (>1500) are only observed at later timesteps, indicating an overall increase in activity.](histo_view.png){ width=50% }
 
 
 # Research application
