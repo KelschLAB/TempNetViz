@@ -6,11 +6,19 @@ tags:
 authors:
   - name: Corentin Nelias
     orcid: 0000-0001-6266-5575
-    affiliation: 1
+    affiliation: 1, 2
+  - name: Jonathan R. Reinwald
+  orcid: 0000-0001-9508-3942
+  affiliation: 1, 2
+  - name: Wolfgang Kelsch
+      orcid: 0000-0002-3470-8125
+      affiliation: 1, 2
 
 affiliations:
- - name: Corentin Nelias, Unimedizin Mainz, Germany
+ - name: Dept. of Psychiatry and Psychotherapy, University Medical Center Mainz, Johannes-Gutenberg University, Untere Zahlbacher Strasse 8, 55131 Mainz, Germany
    index: 1
+ - name: Dept. of Psychiatry and Psychotherapy, Central Institute of Mental Health, Medical Faculty Mannheim, Heidelberg University, Square J5, 68159 Mannheim, Germany
+   index: 2
 
 
 bibliography: paper.bib
@@ -52,26 +60,21 @@ Another way to show the data is to display the graph associated with each timest
 A slider is also provided to allow a finer control over the steps that are being displayed. 
 
 The third way to represent the data is through the so-called temporal layout [CITE]. In this view, the nodes are ordered along the y-axis, and the edges between each nodes are shown at each time step (see Fig. 2). 
+
 ![Fig. 2: Example of temporal layout.](placeholder.png){ width=50% }
 
 This representation makes the structure of the graph less obvious (no attempt is made at displaying strongly connected nodes closer to each other), but makes it very easy to see global changes of activity in the temporal graph.
 Finally, TempNetViz also gives the possibility to plot the values of various graph descriptors (see metric section in the [documentation]) as a function of time via stacked histograms. 
-This entirely discards the information of structure, to make the global evolution of the data more explicit (see Fig. 3).
-![Fig. 3: Example of stacked histogram representation. Color indicates time steps, from deep blue (first time step) to deep red (last time step). In this example, we see that the largest strength values (>1500) are only observed at later timesteps, indicating an overall increase in activity.](histo_view.png){ width=50% }
-
+This entirely discards the information of structure, to make evolution of the data on a global scale more explicit (see Fig. 3).
+![Fig. 3: Example of stacked histogram representation. Color indicates time steps, from deep blue (first time step) to deep red (last time step). In this example, we see that the largest strength values (>1500) are only observed at later timesteps, indicating an overall increase in activity towards the end of the experiment.](histo_view.png){ width=50% }
 
 # Research application
-Cite sRC paper here, and show how we can observe the sRC with the GUI.
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
+TempNetViz was used 
 
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
-
-# Related software
-cite existing softwares and GUI for graph visualization
- [@igraph] 
+# Acknowledgement
+The work was funded by BMBF 3R consortium grants ‘NoSeMaze1’ (161L0277A) and ‘NoSeMaze2’ (16LW0333K) to W.K., Leibniz Association program grant ‘Learning resilience’ (K430/2021) to W.K., 
+Boehringer Ingelheim Foundation grant ‘Complex Systems’ to W.K., BMBF CRCNS grant ‘Oxystate’ (01GQ1708) to W.K, DFG CRC 379 Project C03 to W.K., 
+and the DFG Clinician Scientist Program ‘Interfaces and Interventions in Complex Chronic Conditions’ (EB187/8-1) to J.R.
 
 # References
 
@@ -85,10 +88,5 @@ Cytoscape + Timenexus
 
 Linhares, C. D., Ponciano, J. R., Paiva, J. G. S., Travençolo, B. A., & Rocha, L. E. (2023). Visualisation of structure and processes on temporal networks. In Temporal network theory (pp. 83-105). Cham: Springer International Publishing.
 
+Nelias, C., Ghanayem, S., Wolf, D., Moor, M., Scheller, M. F., Grinewich, V., ... & Kelsch, W. (2025). Stable clique membership in mouse societies requires oxytocin-enabled social sensory states. bioRxiv, 2025-08.
 
-# previous version:
-
-Temporal network analysis is a growing area of research focused on understanding how graphs evolve over time. Graphs can be used to represent a broad variety of systems, and are thus commmonly used in wide array of scientific fields such as neuroscience, biology, sociology and natural language processing. 
-However, most systems under study are not static, and just as the structure of a graph can be of key importance, so can its time evolution. Temporal network analysis aims to study both structure and time variation simulatneously, in order to understand the interplay between these fundamental aspects.
-As an inherently multidisciplinary field, it draws on diverse methodologies, multiple mathematical frameworks and data representation. This diversity can make initial exploration and comparison difficult due to the absence of standardized conventions.
-In this context, effective visualization is needed to provide an intuitive entry point into the data and help guide subsequent analytical decisions. To this aim, we developped TempNetViz to visualize temporal betwork data, support early-stage exploration and highlight potential structural and temporal patterns.

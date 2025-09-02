@@ -26,6 +26,7 @@ from tempgraphviz.listbox_selection import MultiSelectDropdown
 from tempgraphviz.tooltip import ToolTip
 
 #To-do: 
+#       - Change name to TempNetViz?
 #       - implement temporal layout!
 #       - include link of doc once online in the GUI (setting/ help section)
 #       - make sure that the "Run" instruction in documentation actually works
