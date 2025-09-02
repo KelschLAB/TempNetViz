@@ -62,7 +62,7 @@ A slider is also provided to allow a finer control over the steps that are being
 
 The third way to represent the data is through the so-called temporal layout `@linhares2023visualisation`. In this view, the nodes are ordered along the y-axis, and the edges between each nodes are shown at each time step (see Fig. 2). 
 
-![Fig. 2: Example of temporal layout. Each column represents a time step, each row a node. Edges between two nodes are shown via curved lines.](temporal_layour.png){ width=50% }
+![Fig. 2: Example of temporal layout. Each column represents a time step, each row a node. Edges between two nodes are shown via curved lines.](temporal_layout.png){ width=50% }
 
 This representation makes the structure of the graph less obvious (no attempt is made at displaying strongly connected nodes closer to each other), but makes it very easy to see global changes of activity in the temporal graph.
 Finally, TempNetViz also gives the possibility to plot the values of various graph descriptors (see metric section in the [documentation]) as a function of time via stacked histograms. 
