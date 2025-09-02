@@ -37,14 +37,14 @@ The field is intrinsically multidisciplinary, drawing upon diverse methodologies
 This methodological diversity, can pose significant challenges for researchers, particularly at the stage of initial data exploration.
 In this context, effective visualization is needed to provide an intuitive entry point into the data and help guide subsequent analytical decisions. 
 To this aim, we developped TempNetViz to visualize temporal network data, support early-stage exploration and highlight potential structural and temporal patterns. Particular attention was given to ease of usability, to make data exploration as intuitive as possible.
-TempNetViz was build using igraph and networkx, two of the most popular graph visualization packages in Python [CITE] [CITE].
+TempNetViz was build using igraph and networkx, two of the most popular graph visualization packages in Python `[@csardi2006igraph; @hagberg2008exploring]`.
 
 # Statement of need
 There are, To the best of our knowledge, no available graphical user interfaces (GUIs) designed specifically for the interactive visualization of temporal graphs. 
-Although some established graph visualization GUIs provide ways for displaying temporal networks [CITE] [CITE], they were not tailored for this purpose. The available features are therefore limited and rely on specialized internal data formats or external plugins. 
+Although some established graph visualization GUIs provide ways for displaying temporal networks `[@bastian2009gephi; @shannon2003cytoscape]`, they were not tailored for this purpose. The available features are therefore limited and rely on specialized internal data formats or external plugins. 
 This represents a substantial learning barrier that must be overcome before any analysis can be conducted. Moreover, it makes systematic comparison across different data representations impossible.
 
-While numerous Python packages for temporal graph analysis are available [CITE][CITE][CITE], they either offer limited visualization capabilities or are more oriented towards modeling and classification. 
+While numerous Python packages for temporal graph analysis are available `[@passos2024networkx; @thompson2021teneto; @hackl2021analysis]`, they either offer limited visualization capabilities or are more oriented towards modeling and classification. 
 Leveraging the strength of the existing dependencies also requires some coding expertise, which can represent a significant obstacle for researchers lacking extensive programming experience. 
 To address these limitations, we developed, we developped TempNetViz to provide and accessible and user-friendly way to visualize temporal graphs.
 
@@ -60,7 +60,7 @@ The result is displayed in 3 dimensions (see Fig. 1) and can be rotate with the 
 Another way to show the data is to display the graph associated with each timestep sequentially to create an animation. While this makes the structure less explicit, it makes the observation of the time evolution more intuitive.
 A slider is also provided to allow a finer control over the steps that are being displayed. 
 
-The third way to represent the data is through the so-called temporal layout [CITE]. In this view, the nodes are ordered along the y-axis, and the edges between each nodes are shown at each time step (see Fig. 2). 
+The third way to represent the data is through the so-called temporal layout `@linhares2023visualisation`. In this view, the nodes are ordered along the y-axis, and the edges between each nodes are shown at each time step (see Fig. 2). 
 
 ![Fig. 2: Example of temporal layout.](placeholder.png){ width=50% }
 
@@ -70,7 +70,7 @@ This entirely discards the information of structure, to make evolution of the da
 ![Fig. 3: Example of stacked histogram representation. Color indicates time steps, from deep blue (first time step) to deep red (last time step). In this example, we see that the largest strength values (>1500) are only observed at later timesteps, indicating an overall increase in activity towards the end of the experiment.](histo_view.png){ width=50% }
 
 # Research application
-TempNetViz was used to study the formation of stable cliques (called rich-clubs) in mouse societies [CITE]. In this article, it has been found that in groups of mice that evolving in a semi-naturalistic environments, highly social and stable cliques tend to form.
+TempNetViz was used to study the formation of stable cliques (called rich-clubs) in mouse societies `@nelias2025stable`. In this article, it has been found that in groups of mice that evolving in a semi-naturalistic environments, highly social and stable cliques tend to form.
 Moreover, it was found that mice that having impaired cortical oxytocin signaling were not able to enter such stable rich-clubs, preserved overall social motivation. These findings helped to underscore the role of oxytocin in tuning sensory systems into a social processing state. 
 In Fig. 4, we show how the main finding of this article can be seen using TempNetViz. In this example, we first prune the graph and retain only the edges between mutual nearest neighbors of 3rd order (graph-cut in TempGraphViz). Then, the nodes which are part of the rich club are displayed (rich-club metric in TempGraphViz). 
 Nodes which are consistently part of the rich club for at least 4 out of 5 time steps are considered part of the stable rich club.
@@ -83,16 +83,3 @@ Boehringer Ingelheim Foundation grant ‘Complex Systems’ to W.K., BMBF CRCNS 
 and the DFG Clinician Scientist Program ‘Interfaces and Interventions in Complex Chronic Conditions’ (EB187/8-1) to J.R.
 
 # References
-
-igraph 
-
-networkx
-
-Bastian, M., Heymann, S., & Jacomy, M. (2009, March). Gephi: an open source software for exploring and manipulating networks. In Proceedings of the international AAAI conference on web and social media (Vol. 3, No. 1, pp. 361-362).
-
-Cytoscape + Timenexus
-
-Linhares, C. D., Ponciano, J. R., Paiva, J. G. S., Travençolo, B. A., & Rocha, L. E. (2023). Visualisation of structure and processes on temporal networks. In Temporal network theory (pp. 83-105). Cham: Springer International Publishing.
-
-Nelias, C., Ghanayem, S., Wolf, D., Moor, M., Scheller, M. F., Grinewich, V., ... & Kelsch, W. (2025). Stable clique membership in mouse societies requires oxytocin-enabled social sensory states. bioRxiv, 2025-08.
-
