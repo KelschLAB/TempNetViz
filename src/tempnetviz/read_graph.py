@@ -1077,8 +1077,8 @@ def display_animation(path_to_file, parent_frame = None, percentage_threshold = 
         visual_style["vertex_frame_color"] = marker_frame_color
         visual_style["edge_arrow_width"] = rescale(np.array([w['weight'] for w in layers[i].es]), default_edge_width)*(default_edge_width)
         visual_style["vertex_label"] = node_labels
-        visual_style["vertex_label_dist"] = 5  # Adjust this value as needed
-
+        visual_style["vertex_label_dist"] = 1 
+        
         if "scale_edge_width" in kwargs and kwargs["scale_edge_width"]:
             g_edge_width = rescale(np.array([e['weight'] for e in layers[i].es()]), default_edge_width)
             visual_style["edge_width"] = g_edge_width

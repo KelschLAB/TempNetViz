@@ -27,7 +27,6 @@ from tempnetviz.tooltip import ToolTip
 from tempnetviz.temporal_layout import plot_temporal_layout
 
 #To-do: 
-    
 #       - put layout button in settings? It is actually not super necessary to have it in main app.
 #       - include link of doc once online in the GUI (setting/ help section)
 #       - make sure that the "Run" instruction in documentation actually works
