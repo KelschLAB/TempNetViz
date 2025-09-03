@@ -42,6 +42,12 @@ Visualize how metrics evolve over time using histograms.
 
 <img src="histo_view.png" alt="Metrics Distribution" width="400">
 
+### Temporal Layout
+
+You can also display the results as a temporal layout.
+<img src="temporal_layout.png" alt="temporal_layout" width="400">
+
+
 ### Graph Animation
 
 Animate the temporal evolution of your graph to better understand dynamics.
