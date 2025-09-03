@@ -34,13 +34,13 @@ Steps to get started:
 
 Visualize temporal graphs as a 3D stack to see how connections evolve over time. You can compute various [metrics](metrics.md) to quantify node importance — important nodes will appear larger.
 
-![Graph Structure](3D_stack.png)
+![Graph Structure](3D_view.png)
 
 ### Metrics Distribution
 
 Visualize how metrics evolve over time using histograms.
 
-![Metrics Distribution](hist_evolution.png)
+![Metrics Distribution](histo_view.png)
 
 ### Graph Animation
 
