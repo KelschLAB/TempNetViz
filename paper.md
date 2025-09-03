@@ -51,7 +51,7 @@ Leveraging the strengths of these existing dependencies also requires coding exp
 To address these limitations, we developed TempNetViz, an easy accessible and user-friendly tool for visualizing temporal graphs.
 
 # Key features
-The main advantage of TempNetViz is that it allows users to switch effortlessly between different representations of the data. Once the analysis parameters have been chosen (for details, see the [documentation]), results can be displayed in four complementary ways. Below, we briefly present these visualization modes and discuss their advantages and limitations.
+The main advantage of TempNetViz is that it allows users to switch effortlessly between different representations of the data. Once the analysis parameters have been chosen (for details, see the [documentation](https://cnelias.github.io/TempNetVizDocs.github.io/)), results can be displayed in four complementary ways. Below, we briefly present these visualization modes and discuss their advantages and limitations.
 
 The first mode, called multi-layer representation, displays each time step as an individual graph within a separate layer. The layers are stacked on top of each other in chronological order from bottom to top, creating a three-dimensional view (see Fig. 1). 
 This view can be rotated interactively with the mouse to show different perspectives of the multi-layer graph. It is probably the most complete representation of the data, but it can become overcrowded when too many time steps are displayed at once.
