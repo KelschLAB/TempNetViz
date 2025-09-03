@@ -26,7 +26,7 @@ Steps to get started:
 4. Optionally, apply a **graph cut** for better readability on large graphs.
 5. Switch between **Graph**, **Histogram**, and **Animation** views to gain different insights.
 
-![Quickstart](quickstart_numbered.png)
+<img src="quickstart_numbered.png" alt="Quickstart" width="400">
 
 ## Main Functionalities
 
@@ -34,22 +34,20 @@ Steps to get started:
 
 Visualize temporal graphs as a 3D stack to see how connections evolve over time. You can compute various [metrics](metrics.md) to quantify node importance — important nodes will appear larger.
 
-![Graph Structure](3D_view.png)
+<img src="3D_view.png" alt="Graph Structure" width="400">
 
 ### Metrics Distribution
 
 Visualize how metrics evolve over time using histograms.
 
-![Metrics Distribution](histo_view.png)
+<img src="histo_view.png" alt="Metrics Distribution" width="400">
 
 ### Graph Animation
 
 Animate the temporal evolution of your graph to better understand dynamics.
 
-![Graph Animation](graph_animation.gif)
-
+<img src="graph_animation.gif" alt="Graph Animation" width="400">
 
 ## License
 
 This project is licensed under the MIT License.
-
