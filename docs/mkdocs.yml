@@ -1,8 +1,0 @@
-site_name: My Docs
-nav:
-  - Home: index.md
-  - Metrics : metrics.md
-  - Graph cut : graph_cut.md
-  - Settings: settings.md
-
-theme: readthedocs
