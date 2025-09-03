@@ -12,8 +12,6 @@ To start the GUI:
 
 python -m tempgraphviz.main_gui
 
-If you do not have Python installed, or prefer not to use it, you can download TempGraphViz as an executable [here](link).
-
 ## Quickstart
 
 Your data should be stored in a single folder as **.csv files**, where each file represents the graph at a specific time point.
@@ -26,34 +24,34 @@ Steps to get started:
 4. Optionally, apply a **graph cut** for better readability on large graphs.
 5. Switch between **Graph**, **Histogram**, and **Animation** views to gain different insights.
 
-<img src="quickstart_numbered.png" alt="Quickstart" width="400">
+![Quickstart](https://github.com/KelschLAB/TemporalGraphViz/raw/main/quickstart_numbered.png)
 
 ## Main Functionalities
 
 ### Structure Visualization
 
-Visualize temporal graphs as a 3D stack to see how connections evolve over time. You can compute various [metrics](metrics.md) to quantify node importance — important nodes will appear larger.
+Visualize temporal graphs as a 3D stack to see how connections evolve over time. You can compute various metrics to quantify node importance — important nodes will appear larger.
 
-<img src="3D_view.png" alt="Graph Structure" width="400">
+![Graph Structure](https://github.com/KelschLAB/TemporalGraphViz/raw/main/3D_view.png)
 
 ### Metrics Distribution
 
 Visualize how metrics evolve over time using histograms.
 
-<img src="histo_view.png" alt="Metrics Distribution" width="400">
+![Metrics Distribution](https://github.com/KelschLAB/TemporalGraphViz/raw/main/histo_view.png)
 
 ### Temporal Layout
 
 You can also display the results as a temporal layout.
 
-<img src="temporal_layout.png" alt="temporal_layout" width="400">
+![Temporal Layout](https://github.com/KelschLAB/TemporalGraphViz/raw/main/temporal_layout.png)
 
 
 ### Graph Animation
 
 Animate the temporal evolution of your graph to better understand dynamics.
 
-<img src="graph_animation.gif" alt="Graph Animation" width="400">
+![Graph Animation](https://github.com/KelschLAB/TemporalGraphViz/raw/main/graph_animation.gif)
 
 ## License
 

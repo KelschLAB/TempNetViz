@@ -1,6 +1,6 @@
 [project]
 name = "tempnetviz"
-version = "0.1.0"
+version = "0.1.12"
 description = ""
 authors = [
     {name = "Corentin Nelias"}
@@ -17,8 +17,13 @@ dependencies = [
     "pandas (>=2.3.2,<3.0.0)"
 ]
 
+
 [tool.poetry]
 packages = [{ include = "tempnetviz", from = "src" }]
+
+include = [
+    { path = "src/tempnetviz/images/*" }
+]
 
 [tool.poetry.scripts]
 tempnetviz = "tempnetviz.main_gui:main"
