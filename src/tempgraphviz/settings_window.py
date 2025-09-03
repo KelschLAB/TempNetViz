@@ -15,7 +15,7 @@ class settingsWindow(tk.Toplevel):
         self.root = root
         self.app = app
         self.title("Settings")
-        self.geometry("400x300")
+        self.geometry("400x320")
         
         self.protocol("WM_DELETE_WINDOW", self.on_close)
         
@@ -132,6 +132,15 @@ class settingsWindow(tk.Toplevel):
         self.edge_cmap_selector.set(self.app.edge_cmap.name)
         self.edge_cmap_selector.bind('<<ComboboxSelected>>', self.edge_cmap_changed)
         
+        cb_label = tk.Label(tab1, text="Show colorbars: ")
+        cb_label.grid(row = 11, column = 1)
+        cb_button = tk.Checkbutton(tab1, text="", command = self.cb_button_clicked)
+        if self.app.show_colorbars:
+            cb_button.select()
+        cb_button.grid(row = 11, column = 2)
+        tp_cb1 = ToolTip(scale_edge_label, "If seleceted, colorbars will indicates the values associated with the colormap.")
+        tp_cb2 = ToolTip(scale_edge_button, "If seleceted, colorbars will indicates the values associated with the colormap.")
+
         # necessary because of tkinter foul handling of radiobuttons. Values do not get set properly, events get triggered when they shouldn't...
         if self.app.edge_type == "distance":
             original_command = dist_button.cget('command')
@@ -233,6 +242,10 @@ class settingsWindow(tk.Toplevel):
         self.app.edge_thickness_var.set(edge_thickness_value)
         self.app.node_thickness_var.set(node_thickness_value)
         self.app.animation_speed_var.set(animation_speed_value)
+        self.redraw()
+        
+    def cb_button_clicked(self):
+        self.app.show_colorbars = not self.app.show_colorbars
         self.redraw()
         
     def on_enter_pressed_hist(self, event):

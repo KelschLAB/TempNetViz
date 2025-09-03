@@ -6,12 +6,12 @@ sys.path.append("..\\src")
 if __name__ == "__main__" and __package__ is None:
     # Go up one level to the package root
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-    __package__ = "tempgraphviz"
+    __package__ = "tempnetviz"
 
-from tempgraphviz.read_graph import *
-from tempgraphviz.settings_window import settingsWindow
-from tempgraphviz.listbox_selection import MultiSelectDropdown
-from tempgraphviz.tooltip import ToolTip
+from tempnetviz.read_graph import *
+from tempnetviz.settings_window import settingsWindow
+from tempnetviz.listbox_selection import MultiSelectDropdown
+from tempnetviz.tooltip import ToolTip
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(test_dir, os.pardir))

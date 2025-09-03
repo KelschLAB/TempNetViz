@@ -16,7 +16,7 @@ from tkinter import messagebox as mb
 if __name__ == "__main__" and __package__ is None:
     # Go up one level to the package root
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-    __package__ = "tempgraphviz"
+    __package__ = "tempnetviz"
     
 from .multilayer_plot import *
 from .graph_animation import *
@@ -1124,7 +1124,7 @@ if __name__ == '__main__':
     # else:
     #     g = ig.Graph.Weighted_Adjacency(data, mode='directed')
     
-    # c = community_clustering([path+file1, path+file2, path+file3, path+file4], algorithm = "infomap", mnn = 4, mutual = True, affinity = True)
+    #  = community_clustering([path+file1, path+file2, path+file3, path+file4], algorithm = "infomap", mnn = 4, mutual = True, affinity = True)
     # print(c)
     
     

@@ -18,24 +18,22 @@ import sys
 if __name__ == "__main__" and __package__ is None:
     # Go up one level to the package root
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-    __package__ = "tempgraphviz"
+    __package__ = "tempnetviz"
 
-from tempgraphviz.read_graph import *
-from tempgraphviz.settings_window import settingsWindow
-from tempgraphviz.listbox_selection import MultiSelectDropdown
-from tempgraphviz.tooltip import ToolTip
-from tempgraphviz.temporal_layout import plot_temporal_layout
+from tempnetviz.read_graph import *
+from tempnetviz.settings_window import settingsWindow
+from tempnetviz.listbox_selection import MultiSelectDropdown
+from tempnetviz.tooltip import ToolTip
+from tempnetviz.temporal_layout import plot_temporal_layout
 
 #To-do: 
-#       - Change name to TempNetViz?
-#       - implement temporal layout!
+    
 #       - put layout button in settings? It is actually not super necessary to have it in main app.
 #       - include link of doc once online in the GUI (setting/ help section)
 #       - make sure that the "Run" instruction in documentation actually works
-#       - write tests
-#       - simplify the metric code in read_graph.py
 
 ###### For future versions: 
+#       - simplify the metric code in read_graph.py for better readability
 #       - Add dynamic layout for animation, such that nodes are not fixed but can move closer/further to points they are similar to.
 #       - Include compatibility with other formats (right now, only compatible with csv format).
 #       - include minimal spanning tree, and jaccard metric (Edge metrics for visual graph analytics: a comparative study) in later version of project.
@@ -85,6 +83,7 @@ class App:
         self.edge_cmap = matplotlib.colormaps.get_cmap("Greys")
         self.node_cmap = "none"
         self.num_bins = 10 # number of bins for the histograms
+        self.show_colorbars = False
 
         self.color1 = "#E4F8FF"
         self.color2 = "#FFF7E3"
@@ -312,14 +311,14 @@ class App:
                       node_labels = self.show_node_lb, show_planes = self.show_planes, edge_cmap = self.edge_cmap, 
                       node_cmap = self.node_cmap)
             
-
-        f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.edge_cmap), ax=a, label="Normalized edge value", shrink = 0.3, location = 'right', pad = 0.1)
-        if self.node_metric != "none" and self.node_cmap != "none":
-            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.node_cmap), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
-        else: # to keep layout consistent across changes of settings
-            cb = f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
-            cb.remove()
-        
+        if self.show_colorbars:
+            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.edge_cmap), ax=a, label="Normalized edge value", shrink = 0.3, location = 'right', pad = 0.1)
+            if self.node_metric != "none" and self.node_cmap != "none":
+                f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.node_cmap), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
+            else: # to keep layout consistent across changes of settings
+                cb = f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
+                cb.remove()
+            
         f.subplots_adjust(left=0, bottom=0, right=0.948, top=1, wspace=0, hspace=0)
 
         canvas = FigureCanvasTkAgg(f, master=self.content_frame)
@@ -363,20 +362,20 @@ class App:
                       scale_edge_width = self.scale_edge_width, between_layer_edges = self.between_layer_edges, 
                       interframe = int(self.animation_speed_var.get()), node_labels = self.show_node_lb,
                       node_cmap = self.node_cmap, edge_cmap = self.edge_cmap)
-        
-        if self.scale_edge_width:
-            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.edge_cmap),
-                       ax=a, label="Normalized edge value", shrink = 0.3,
-                       location = 'right', pad = 0.1, fraction=0.05)
-        if self.node_metric != "none" and self.node_cmap != "none":
-            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.node_cmap), ax=a,
-                       label="Normalized metric value", shrink = 0.3,
-                       fraction=0.05, location = 'left')
-        else: # to keep layout consistent across changes of settings
-            cb = f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds),
-                            ax=a, label="Normalized metric value", shrink = 0.3,
-                            fraction=0.05, location = 'left')
-            cb.remove()
+        if self.show_colorbars:
+            if self.scale_edge_width:
+                f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.edge_cmap),
+                           ax=a, label="Normalized edge value", shrink = 0.3,
+                           location = 'right', pad = 0.1, fraction=0.05)
+            if self.node_metric != "none" and self.node_cmap != "none":
+                f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.node_cmap), ax=a,
+                           label="Normalized metric value", shrink = 0.3,
+                           fraction=0.05, location = 'left')
+            else: # to keep layout consistent across changes of settings
+                cb = f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds),
+                                ax=a, label="Normalized metric value", shrink = 0.3,
+                                fraction=0.05, location = 'left')
+                cb.remove()
             
     def templayout_in_frame(self):
         if len(self.active_path_list) == 0:
@@ -402,14 +401,14 @@ class App:
                       scale_edge_width = self.scale_edge_width, between_layer_edges = self.between_layer_edges,
                       node_labels = self.show_node_lb, show_planes = self.show_planes, edge_cmap = self.edge_cmap, 
                       node_cmap = self.node_cmap)
-        
-        f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.edge_cmap), ax=a, label="Normalized edge value", shrink = 0.3, location = 'right', pad = 0.1)
-        if self.node_metric != "none" and self.node_cmap != "none":
-            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.node_cmap), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
-        else: # to keep layout consistent across changes of settings
-            cb = f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
-            cb.remove()
-        
+        if self.show_colorbars:
+            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.edge_cmap), ax=a, label="Normalized edge value", shrink = 0.3, location = 'right', pad = 0.1)
+            if self.node_metric != "none" and self.node_cmap != "none":
+                f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.node_cmap), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
+            else: # to keep layout consistent across changes of settings
+                cb = f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
+                cb.remove()
+            
         f.subplots_adjust(left=0, bottom=0, right=0.948, top=1, wspace=0, hspace=0)
 
         canvas = FigureCanvasTkAgg(f, master=self.content_frame)

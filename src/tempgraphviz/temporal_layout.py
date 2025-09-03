@@ -2,10 +2,11 @@ import igraph as ig
 import matplotlib.pyplot as plt
 import numpy as np
 import os, sys
+from copy import copy
 if __name__ == "__main__" and __package__ is None:
     # Go up one level to the package root
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-    __package__ = "tempgraphviz"
+    __package__ = "tempnetviz"
 from .read_graph import *
 
 def get_metric(data, metric, default_node_size, **kwargs):
@@ -55,29 +56,56 @@ def get_metric(data, metric, default_node_size, **kwargs):
             node_size = [default_node_size]*data.shape[0]
             
         return node_size
+    
+def get_ordering_indices(g):
+    """
+    orders the nodes in input graph g according to detected communities, and within each
+    community according to increasing strength. This is to minimize edge overlap in final plot.
+    """
+    communities = g.community_optimal_modularity(weights=[1/e['weight'] for e in g.es()]) 
+    idx = [i for i in range(len(communities))]
+    strengths = np.array(g.strength())
+    ordered_indices = [0 for i in range(g.vcount())]
+    for i in range(len(communities)):
+        for j in communities[i]:
+            ordered_indices[j] = i
+    counter = 0
+    communities = np.array(copy(ordered_indices))
+    final_sorting = np.zeros(g.vcount())
+    for value in np.unique(communities):
+        where_value = np.where(communities == value)[0]
+        sorting_str_idx = where_value[np.argsort(strengths[where_value])]
+        for idx, pos in enumerate(sorting_str_idx):
+            final_sorting[pos] += idx + counter 
+        counter += np.sum(communities == value)
+    return final_sorting
 
 def plot_temporal_layout(path_to_file, ax=None, percentage_threshold = 0.0, mnn = None, avg_graph = False,
                   affinity = True, rm_fb_loops = True, mutual = True, rm_index = True, **kwargs):
+    #loading data
+    layers = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, mutual = mutual, \
+                      avg_graph = avg_graph, affinity = affinity, rm_fb_loops = rm_fb_loops, rm_index = rm_index, return_ig=True)
+    data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, mutual = mutual, \
+                      avg_graph = avg_graph, affinity = affinity, rm_fb_loops = rm_fb_loops, rm_index = rm_index)
+    node_number = data[0].shape[0]
+    timesteps = len(layers)
+
+    # getting node ordering for plotting layout
+    avg_graph = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, mutual = mutual, \
+                      avg_graph = True, affinity = affinity, rm_fb_loops = rm_fb_loops, rm_index = rm_index, 
+                      return_ig = True)[0]
+    order_y = get_ordering_indices(avg_graph)
+    # order_y = range(node_number)
     
+    # parameters for graph plotting
     if rm_index == False and ("node_labels" in kwargs and kwargs["node_labels"]):
         node_labels = [str(i) for i in range(len(read_labels(path_to_file)))] 
     elif ("node_labels" in kwargs and kwargs["node_labels"]):
         node_labels = read_labels(path_to_file) 
     else:
         node_labels = None
-        
-    layers = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, mutual = mutual, \
-                      avg_graph = avg_graph, affinity = affinity, rm_fb_loops = rm_fb_loops, rm_index = rm_index, return_ig=True)
-
-    data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, mutual = mutual, \
-                      avg_graph = avg_graph, affinity = affinity, rm_fb_loops = rm_fb_loops, rm_index = rm_index)
-    node_number = data[0].shape[0]
-        
     default_node_size = kwargs["node_size"] if "node_size" in kwargs else 15
     default_edge_width = kwargs["edge_width"] if "edge_width" in kwargs else 5
-        
-    timesteps = len(layers)
-    
     if ax is None:
         fig, ax = plt.subplots(1, 1, figsize=(12, 6))
         
@@ -85,7 +113,7 @@ def plot_temporal_layout(path_to_file, ax=None, percentage_threshold = 0.0, mnn 
     for time_idx in range(timesteps):
         layout = []
         for i in range(node_number):  
-            layout.append((time_idx, i))  # Position nodes vertically (y-axis)
+            layout.append((time_idx, order_y[i]))  # Position nodes vertically (y-axis)
         
         if isSymmetric(data[time_idx]):
             directed = False
@@ -106,9 +134,7 @@ def plot_temporal_layout(path_to_file, ax=None, percentage_threshold = 0.0, mnn 
         visual_style["vertex_label_size"] = node_size
         visual_style["edge_width"] = 2
         visual_style["edge_color"] = "gray"
-        # visual_style["bbox"] = (200, 300)
-        # visual_style["margin"] = 50
-        visual_style["edge_curved"] = 0.5
+        visual_style["edge_curved"] = 0.2
         visual_style["edge_arrow_width"] = 10 if directed else 0
         if "edge_cmap" in kwargs:
             edge_cmap = kwargs["edge_cmap"]
@@ -130,10 +156,12 @@ def plot_temporal_layout(path_to_file, ax=None, percentage_threshold = 0.0, mnn 
         visual_style["edge_color"] = edge_color
         ig.plot(subgraph, target=ax, layout=layout, **visual_style)
         
-    # ax.set_yticks(range(node_number))
+    ax.set_yticks(range(node_number))
+    ax.set_yticklabels(node_labels)  # Label each tick
     ax.set_xticks(range(timesteps))  # Set ticks at each time step position
     ax.set_xticklabels([f'{i+1}' for i in range(timesteps)])  # Label each tick
     ax.set_xlabel('Timesteps')
+    ax.grid(alpha = 0.5)
     
 if __name__ == "__main__":
     path = "..\\..\\data\\nosemaze\\both_cohorts_1days\\G1\\"
