@@ -1,16 +1,16 @@
-# TempGraphViz
+# TempNetViz
 
-**TempGraphViz** is an interactive GUI designed for exploring, analyzing, and visualizing **temporal graphs** — graphs that evolve over time.
+**TempNetViz** is an interactive GUI designed for exploring, analyzing, and visualizing **temporal graphs** — graphs that evolve over time.
 
 ## Installation & usage
 
-You can install TempGraphViz with pip using:
+You can install TempNetViz with pip using:
 
-pip install tempgraphviz
+pip install tempnetviz
 
 To start the GUI:
 
-python -m tempgraphviz.main_gui
+python -m tempnetviz.main_gui
 
 ## Quickstart
 
