@@ -45,6 +45,7 @@ Visualize how metrics evolve over time using histograms.
 ### Temporal Layout
 
 You can also display the results as a temporal layout.
+
 <img src="temporal_layout.png" alt="temporal_layout" width="400">
 
 
