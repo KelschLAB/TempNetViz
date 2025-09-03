@@ -51,16 +51,14 @@ Leveraging the strengths of these existing dependencies also requires coding exp
 To address these limitations, we developed TempNetViz, an easy accessible and user-friendly tool for visualizing temporal graphs.
 
 # Key features
-The main advantage of TempNetViz is that it allows users to switch effortlessly between different representations of the data. Once the analysis parameters have been chosen (for details, see the [documentation]), 
-results can be displayed in four complementary ways. Below, we briefly present these visualization modes and discuss their advantages and limitations.
+The main advantage of TempNetViz is that it allows users to switch effortlessly between different representations of the data. Once the analysis parameters have been chosen (for details, see the [documentation]), results can be displayed in four complementary ways. Below, we briefly present these visualization modes and discuss their advantages and limitations.
 
 The first mode, called multi-layer representation, displays each time step as an individual graph within a separate layer. The layers are stacked on top of each other in chronological order from bottom to top, creating a three-dimensional view (see Fig. 1). 
 This view can be rotated interactively with the mouse to show different perspectives of the multi-layer graph. It is probably the most complete representation of the data, but it can become overcrowded when too many time steps are displayed at once.
 
 ![Fig. 1: Example of multi-layer representation. The colors of the nodes indicate how strongly connected they are to others, from blue (low connectivity) to red (strong connectivity). The same color mapping is applied to edges between nodes to represent their magnitude.](3D_view.png){ width=50% }
 
-The second mode displays the graph associated with each time step sequentially, producing an animation of the network's evolution. While this approach makes the structure less explicit, it provides a highly intuitive view of temporal changes. 
-A slider is also included to give users fine-grained control over which time steps are displayed. 
+The second mode displays the graph associated with each time step sequentially, producing an animation of the network's evolution. While this approach makes the structure less explicit, it provides a highly intuitive view of temporal changes. A slider is also included to give users fine-grained control over which time steps are displayed. 
 
 The third mode is the temporal layout `@linhares2023visualisation`. In this view, nodes are are arranged along the y-axis, and edges are drawn at each time step (see Fig. 2). The ordering of the nodes along the y-axis is chosen to minimize overlap between edges and to enhance clarity. Unlike other layouts, it does not cluster strongly connected nodes, so the underlying graph structure is less evident. Instead, it emphasizes a clear depiction of global activity patterns and their evolution over time.
 
@@ -68,20 +66,19 @@ The third mode is the temporal layout `@linhares2023visualisation`. In this view
 
 Finally, TempNetViz allows users to plot the values of various graph descriptors (see the metrics section in the [documentation]) as a function of time using stacked histograms. This mode discards structural information entirely, instead emphasizing how global properties evolve (see Fig. 3).
 
-![Fig. 3: Example of stacked histogram representation. Colors indicate time steps, from deep blue (first time step) to deep red (last time step). In this example, the largest strength values (>1500) appear only at later time steps, indicating an overall increase in activity toward the end of the experiment.](histo_view.png){ width=50% }
+![Fig. 3: Example of stacked histogram representation. Colors indicate time steps, from deep blue (first time step) to deep red (last time step). In this example, the highest strength values (>1500) appear only at later time steps, indicating an overall increase in activity toward the end of the experiment.](histo_view.png){ width=50% }
 
 In addition to the main data representations, TempNetViz allows computation of a range of standard graph metrics to characterize the importance of nodes at each time step in the temporal network. Nodes are sized and colored according to the value of the selected metric, and both node and edge colors can be customized using different colormaps to enhance visibility. For example, in Fig. 1, nodes are colored by their strength, a metric that quantifies the sum of the weights of all edges connected to a node.
 
 # Research application
-TempNetViz was applied to explore the formation of stable cliques (so called 'rich-clubs') in mouse societies `@nelias2025stable`. In this study, it was shown that in groups of mice living in semi-naturalistic environments, highly social and stable cliques tend to emerge. To demonstrate this, pairwise interactions between mice were extracted from long-term video recordings, and temporal networks were constructed by aggregating the total number of interactions within three-day windows. Each subgraph of the temporal network revealed the presence of rich-clubs, i.e. groups of highly interconnected nodes. Tracking their evolution over time showed that one specific clique remained part of the rich-club throughout the entire experiment and was therefore identified as a stable rich-club. Importantly, mice with impaired cortical oxytocin signaling were unable to enter such stable rich-clubs, despite maintaining overall social motivation. These findings highlight the role of oxytocin in tuning sensory systems toward a social processing state.
+TempNetViz was applied to explore the formation of stable cliques (so called 'rich-clubs') in mouse societies `@nelias2025stable`. The study shows that in groups of mice living in semi-naturalistic environments, highly social and stable cliques tend to emerge. To demonstrate this, pairwise interactions between mice were extracted from long-term video recordings, and temporal networks were constructed by aggregating the total number of interactions within three-day windows. Each subgraph of the temporal network revealed the presence of rich-clubs, i.e. groups of highly interconnected nodes. Tracking their evolution over time showed that one specific clique remained part of the rich-club throughout most of the experiment and was therefore identified as a stable rich-club. Importantly, mice with impaired cortical oxytocin signaling were unable to enter such stable rich-clubs, despite maintaining overall social motivation. These findings highlight the role of oxytocin in tuning sensory systems toward a social processing state.
 
 Figure 4 illustrates how the main finding of this article can be visualized using TempNetViz. In this example, the graph was first pruned to retain only edges between mutual nearest neighbors of 3rd order (graph-cut in TempNetViz). The nodes belonging to the rich-club were then identified (rich-club metric in TempNetViz). Nodes that were part of the rich club in at least four out of five time steps were considered members of the stable rich club. In this case, three mice were met this criterion.
 ![Fig. 4: Example of stable rich club observation. Graphs were first pruned via mutual nearest neighbors of order 3. Nodes that are part of the rich-club (via ‘metric’ menu in TempNetViz, degree k > 3) are shown in black. Nodes were considered part of the stable rich-club if they appeared in the rich club in four out of five time steps. In this example, mice with impaired oxytocin signaling were excluded from the stable rich club.](src_example.png){ width=50% }
 
 
 # Acknowledgement
-The work was funded by BMBF 3R consortium grants ‘NoSeMaze1’ (161L0277A) and ‘NoSeMaze2’ (16LW0333K) to W.K., Leibniz Association program grant ‘Learning resilience’ (K430/2021) to W.K., 
-Boehringer Ingelheim Foundation grant ‘Complex Systems’ to W.K., BMBF CRCNS grant ‘Oxystate’ (01GQ1708) to W.K, DFG CRC 379 Project C03 to W.K., 
+The work was funded by BMBF 3R consortium grants ‘NoSeMaze1’ (161L0277A) and ‘NoSeMaze2’ (16LW0333K) to W.K., Leibniz Association program grant ‘Learning resilience’ (K430/2021) to W.K., Boehringer Ingelheim Foundation grant ‘Complex Systems’ to W.K., BMBF CRCNS grant ‘Oxystate’ (01GQ1708) to W.K, DFG CRC 379 Project C03 to W.K., 
 and the DFG Clinician Scientist Program ‘Interfaces and Interventions in Complex Chronic Conditions’ (EB187/8-1) to J.R.
 
 # References
