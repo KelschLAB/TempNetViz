@@ -8,6 +8,53 @@ if __name__ == "__main__" and __package__ is None:
     __package__ = "tempgraphviz"
 from .read_graph import *
 
+def get_metric(data, metric, default_node_size, **kwargs):
+        if isSymmetric(data):
+            g = ig.Graph.Weighted_Adjacency(data, mode='undirected')
+        else:
+            g = ig.Graph.Weighted_Adjacency(data, mode='directed')    
+    
+        if metric == "betweenness":
+            edge_betweenness = g.betweenness(weights = [1/e['weight'] for e in g.es()]) #taking the inverse of edge values as we want high score to represent low distances
+            edge_betweenness = ig.rescale(edge_betweenness)
+            node_size = [(1+e)*default_node_size for e in edge_betweenness]
+        elif metric == "strength":
+            edge_strength = g.strength(weights = [e['weight'] for e in g.es()])
+            edge_strength = ig.rescale(edge_strength)
+            node_size = [(1+e)*default_node_size for e in edge_strength]
+        elif metric == "closeness":
+            edge_closeness = g.closeness(weights = [1/e['weight'] for e in g.es()]) #taking the inverse of edge values as we want high score to represent low distances
+            edge_closeness = ig.rescale(edge_closeness)
+            node_size = [(1+e)*default_node_size for e in edge_closeness]
+        elif metric == "hub score":
+            edge_hub = g.hub_score(weights = [e['weight'] for e in g.es()])
+            edge_hub = ig.rescale(edge_hub)
+            node_size = [(1+e)*default_node_size for e in edge_hub]
+        elif metric == "authority score":
+            edge_authority = g.authority_score(weights = [e['weight'] for e in g.es()])
+            edge_authority = ig.rescale(edge_authority)
+            node_size = [(1+e)*default_node_size for e in edge_authority]
+        elif metric  == "eigenvector centrality":
+            random.seed(1)
+            edge_evc = g.eigenvector_centrality(weights = [e['weight'] for e in g.es()])
+            edge_evc = ig.rescale(edge_evc)
+            node_size = [(1+e)*default_node_size for e in edge_evc]
+        elif metric  == "page rank":
+            edge_pagerank = g.personalized_pagerank(weights = [e['weight'] for e in g.es()])
+            edge_pagerank = ig.rescale(edge_pagerank)
+            node_size = [(1+e)*default_node_size for e in edge_pagerank]
+        elif metric  == "rich-club":
+            k_degree = kwargs["deg"]
+            node_size = rich_club_weights(g, k_degree, 0.3)
+            node_size = [n*default_node_size for n in node_size]
+        elif metric == "k-core":
+            k_degree = kwargs["deg"]
+            node_size = k_core_weights(data, k_degree, 0.5)
+            node_size = [n*default_node_size for n in node_size]
+        else: # in case no metric is given
+            node_size = [default_node_size]*data.shape[0]
+            
+        return node_size
 
 def plot_temporal_layout(path_to_file, ax=None, percentage_threshold = 0.0, mnn = None, avg_graph = False,
                   affinity = True, rm_fb_loops = True, mutual = True, rm_index = True, **kwargs):
@@ -23,44 +70,40 @@ def plot_temporal_layout(path_to_file, ax=None, percentage_threshold = 0.0, mnn 
                       avg_graph = avg_graph, affinity = affinity, rm_fb_loops = rm_fb_loops, rm_index = rm_index, return_ig=True)
 
     data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, mutual = mutual, \
-                      avg_graph = avg_graph, affinity = affinity, rm_fb_loops = rm_fb_loops, rm_index = rm_index)[0]
-
-    if isSymmetric(data):
-        directed = False
-    else:
-        directed = True
+                      avg_graph = avg_graph, affinity = affinity, rm_fb_loops = rm_fb_loops, rm_index = rm_index)
+    node_number = data[0].shape[0]
         
     default_node_size = kwargs["node_size"] if "node_size" in kwargs else 15
     default_edge_width = kwargs["edge_width"] if "edge_width" in kwargs else 5
         
-    g = ig.Graph.Tree(data.shape[0], 2) 
     timesteps = len(layers)
-    g.vs["name"] = node_labels
     
-   
-    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
-    
-    events = [g.get_edgelist() for g in layers]
-    
-    
+    if ax is None:
+        fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+        
     # Plot each time point
     for time_idx in range(timesteps):
         layout = []
-        for i in range(data.shape[0]):  # 5 nodes
-            layout.append((time_idx, data.shape[0]-i))  # Position nodes vertically (y-axis)
+        for i in range(node_number):  
+            layout.append((time_idx, i))  # Position nodes vertically (y-axis)
         
-        # ax = axes[time_idx]        
-        # Create a subgraph for this time point
-        # In a real scenario, you would have different edges at different times
-        subgraph_edges = events[time_idx]
-        subgraph = ig.Graph(data.shape[0], edges=subgraph_edges,  directed = directed)
-        
+        if isSymmetric(data[time_idx]):
+            directed = False
+        else:
+            directed = True
+        mode = 'directed' if directed else 'undirected'
+        subgraph = ig.Graph.Weighted_Adjacency(data[time_idx],  mode = mode)
+        if rm_fb_loops:
+            subgraph.delete_edges([edge for edge in subgraph.es if edge.source == edge.target])
+
         # Visual styling
         visual_style = {}
         # visual_style["vertex_label"] = g.vs["name"]
-        visual_style["vertex_size"] = 30
-        visual_style["vertex_color"] = "black"
-        visual_style["vertex_label_size"] = 10
+        node_size = get_metric(data[time_idx], kwargs["node_metric"], default_node_size, deg = kwargs["deg"])
+        visual_style["vertex_size"] = node_size
+        visual_style["vertex_color"] = [kwargs["node_cmap"](s) for s in rescale(node_size, 1) - 0.01] if kwargs["node_cmap"] != "none" else "black"
+
+        visual_style["vertex_label_size"] = node_size
         visual_style["edge_width"] = 2
         visual_style["edge_color"] = "gray"
         # visual_style["bbox"] = (200, 300)
@@ -86,31 +129,32 @@ def plot_temporal_layout(path_to_file, ax=None, percentage_threshold = 0.0, mnn 
         visual_style["edge_width"] = display_edge_width
         visual_style["edge_color"] = edge_color
         ig.plot(subgraph, target=ax, layout=layout, **visual_style)
-    
-    # Set proper x-axis labels and limits
-    ax.set_xlim(-0.5, timesteps - 0.5)  # Add some padding
+        
+    # ax.set_yticks(range(node_number))
     ax.set_xticks(range(timesteps))  # Set ticks at each time step position
     ax.set_xticklabels([f'{i+1}' for i in range(timesteps)])  # Label each tick
     ax.set_xlabel('Timesteps')
-    plt.tight_layout()
-    plt.show()
     
-path = "..\\..\\data\\nosemaze\\both_cohorts_1days\\G1\\"
-file1 = "interactions_resD1_01.csv"
-file2 = "interactions_resD1_02.csv"
-file3 = "interactions_resD1_03.csv"
-file4 = "interactions_resD1_04.csv"
-file5 = "interactions_resD1_05.csv"
-file6 = "interactions_resD1_06.csv"
-file7 = "interactions_resD1_07.csv"
-file8 = "interactions_resD1_08.csv"
-file9 = "interactions_resD1_09.csv"
-file10 = "interactions_resD1_10.csv"
-file11 = "interactions_resD1_11.csv"
-file12 = "interactions_resD1_12.csv"
-paths = [path+file1, path+file2,path+file3, path+file4, 
-        path+file5,  path+file6,  path+file7, path+file8
-        , path+file9, path+file10, path+file11, path+file12]
-
-plot_temporal_layout(paths, mnn = 5, scale_edge_width = True, node_size = 10, edge_width = 2, between_layer_edges = False, rm_fb_loops=True,  cluster_num = None, node_labels = True, rm_index = True,
-node_cmap = cm.coolwarm, edge_cmap = cm.Greys)
+if __name__ == "__main__":
+    path = "..\\..\\data\\nosemaze\\both_cohorts_1days\\G1\\"
+    file1 = "interactions_resD1_01.csv"
+    file2 = "interactions_resD1_02.csv"
+    file3 = "interactions_resD1_03.csv"
+    file4 = "interactions_resD1_04.csv"
+    file5 = "interactions_resD1_05.csv"
+    file6 = "interactions_resD1_06.csv"
+    file7 = "interactions_resD1_07.csv"
+    file8 = "interactions_resD1_08.csv"
+    file9 = "interactions_resD1_09.csv"
+    file10 = "interactions_resD1_10.csv"
+    file11 = "interactions_resD1_11.csv"
+    file12 = "interactions_resD1_12.csv"
+    paths = [path+file1, path+file2,path+file3, path+file4, 
+            path+file5,  path+file6,  path+file7, path+file8
+            , path+file9, path+file10, path+file11, path+file12]
+    
+    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+    plot_temporal_layout(paths, ax, mnn = 5, deg = 3,
+                         node_size = 10, edge_width = 2, between_layer_edges = False, 
+                         rm_fb_loops=True,  cluster_num = None, node_labels = True, rm_index = True,
+                         node_metric = "k-core", node_cmap = cm.coolwarm, edge_cmap = cm.Greys, scale_edge_width = False)

@@ -24,13 +24,16 @@ from tempgraphviz.read_graph import *
 from tempgraphviz.settings_window import settingsWindow
 from tempgraphviz.listbox_selection import MultiSelectDropdown
 from tempgraphviz.tooltip import ToolTip
+from tempgraphviz.temporal_layout import plot_temporal_layout
 
 #To-do: 
 #       - Change name to TempNetViz?
 #       - implement temporal layout!
+#       - put layout button in settings? It is actually not super necessary to have it in main app.
 #       - include link of doc once online in the GUI (setting/ help section)
 #       - make sure that the "Run" instruction in documentation actually works
 #       - write tests
+#       - simplify the metric code in read_graph.py
 
 ###### For future versions: 
 #       - Add dynamic layout for animation, such that nodes are not fixed but can move closer/further to points they are similar to.
@@ -171,18 +174,22 @@ class App:
 
         # Display type buttons (plot, stats, animation)
         tk.Label(result_display_frame, text="Display type", font = 'Helvetica 12 bold', bg =  self.color3).place(relx = 0.1, rely = 0.1, relwidth=0.8, relheight=0.2)
-        self.plot_btn = tk.Button(result_display_frame, text='Graph(s)')
+        self.plot_btn = tk.Button(result_display_frame, text='Multi-layer')
         self.plot_btn.place(relx = 0.1, rely = 0.4, relwidth=0.38, relheight=0.2)
         self.plot_btn["command"] = self.plot_clicked
         self.stats_btn = tk.Button(result_display_frame, text='Histogram')
         self.stats_btn.place(relx = 0.5, rely = 0.4, relwidth=0.39, relheight=0.2)
         self.stats_btn["command"] = self.stats_clicked
         self.anim_btn = tk.Button(result_display_frame, text='Animation')
-        self.anim_btn.place(relx = 0.29, rely = 0.65, relwidth=0.39, relheight=0.2)
+        self.anim_btn.place(relx = 0.1, rely = 0.65, relwidth=0.39, relheight=0.2)
         self.anim_btn["command"] = self.animation_clicked
+        self.tl_btn = tk.Button(result_display_frame, text='Temp. layout')
+        self.tl_btn.place(relx = 0.5, rely = 0.65, relwidth=0.39, relheight=0.2)
+        self.tl_btn["command"] = self.templayout_clicked
         self.plot_btn.config(bg="#d1d1d1")
         self.stats_btn.config(bg="#f0f0f0")
         self.anim_btn.config(bg="#f0f0f0")
+        self.tl_btn.config(bg="#f0f0f0")
         
         # Starting instructions label
         txt = "------------------------------------- QUICKSTART --------------------------------------------\n\n"
@@ -191,7 +198,7 @@ class App:
         txt += "      You can select files by dragging the mouse, or by holding ctrl and clicking.\n\n"
         txt += "3. Change the representation with the layout and metric buttons. If you are working with \n"
         txt += "      large graphs, apply a graph cut to remove weak edges and improve visibility.\n\n"
-        txt += "4. You can switch the result display with the 'plot', 'statistics' and animation buttons"
+        txt += "4. You can switch the result display with the 'multi-layer', 'statistics',\n 'animation' and 'Temp. layout' buttons"
         self.label = tk.Label(self.content_frame, font = 'Helvetica 13 bold', 
                               text = txt)
         self.label.place(relx=0.1, rely=0.2, relwidth=0.8, relheight=0.5)
@@ -370,6 +377,46 @@ class App:
                             ax=a, label="Normalized metric value", shrink = 0.3,
                             fraction=0.05, location = 'left')
             cb.remove()
+            
+    def templayout_in_frame(self):
+        if len(self.active_path_list) == 0:
+            return
+        for fm in self.content_frame.winfo_children():
+            fm.destroy()
+            root.update()
+            
+        # Show temporary "Loading..." label before plotting
+        self.label = ttk.Label(self.content_frame, text="Rendering graph...", font = 'Helvetica 20 bold')
+        self.label.place(relx=0.3, rely=0.2, relwidth=0.8, relheight=0.4)
+        self.content_frame.update()
+                
+        px = 1/plt.rcParams['figure.dpi']  # pixel in inches
+        f = Figure(figsize=(950*px,500*px))
+        a = f.add_subplot(111)
+
+        plot_temporal_layout(self.path_to_file, a, percentage_threshold = self.percentage_threshold, mnn = self.mnn_number, mutual = self.mutual, \
+                      avg_graph = self.view_type == "avg", affinity = self.edge_type == "affinity",  rm_fb_loops = self.remove_loops, \
+                      layout = self.layout_style, node_metric = self.node_metric, rm_index = self.rm_index, \
+                      idx = self.idx, cluster_num = self.cluster_num, layer_labels=self.path_to_file, deg = self.degree,
+                      edge_width = int(self.edge_thickness_var.get()), node_size = int(self.node_thickness_var.get()), 
+                      scale_edge_width = self.scale_edge_width, between_layer_edges = self.between_layer_edges,
+                      node_labels = self.show_node_lb, show_planes = self.show_planes, edge_cmap = self.edge_cmap, 
+                      node_cmap = self.node_cmap)
+        
+        f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.edge_cmap), ax=a, label="Normalized edge value", shrink = 0.3, location = 'right', pad = 0.1)
+        if self.node_metric != "none" and self.node_cmap != "none":
+            f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=self.node_cmap), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
+        else: # to keep layout consistent across changes of settings
+            cb = f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
+            cb.remove()
+        
+        f.subplots_adjust(left=0, bottom=0, right=0.948, top=1, wspace=0, hspace=0)
+
+        canvas = FigureCanvasTkAgg(f, master=self.content_frame)
+        NavigationToolbar2Tk(canvas, self.content_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack()#fill=tk.BOTH, expand=True, side="top") 
+        self.label.destroy()
     
     def graphcut_param_window(self, event):
         """
@@ -440,19 +487,25 @@ class App:
             self.mutual = False
         self.node_metric = self.node_metric_selector.get()
         self.new_window.destroy()
+        self.refresh_plot()
+       
+    def refresh_plot(self):
         if self.display_type == "plot":
             self.plot_in_frame()
         elif self.display_type == "stats":
             self.stats_in_frame()
         elif self.display_type == "animation":
             self.animation_in_frame()
-        
+        elif self.display_type == "temporal layout":
+            self.templayout_in_frame()
+            
     def plot_clicked(self):
         self.display_type = "plot"
         self.plot_in_frame()
         self.plot_btn.config(bg="#d1d1d1")
         self.stats_btn.config(bg="#f0f0f0")
         self.anim_btn.config(bg="#f0f0f0")
+        self.tl_btn.config(bg="#f0f0f0")
 
     def stats_clicked(self):
         self.display_type = "stats"
@@ -460,23 +513,28 @@ class App:
         self.plot_btn.config(bg="#f0f0f0")
         self.stats_btn.config(bg="#d1d1d1")
         self.anim_btn.config(bg="#f0f0f0")
-        
+        self.tl_btn.config(bg="#f0f0f0")
+
     def animation_clicked(self):
         self.display_type = "animation"
         self.animation_in_frame()
         self.plot_btn.config(bg="#f0f0f0")
         self.stats_btn.config(bg="#f0f0f0")
         self.anim_btn.config(bg="#d1d1d1")
-    
+        self.tl_btn.config(bg="#f0f0f0")
+
+    def templayout_clicked(self):
+        self.display_type = "temporal layout"
+        self.templayout_in_frame()
+        self.plot_btn.config(bg="#f0f0f0")
+        self.stats_btn.config(bg="#f0f0f0")
+        self.anim_btn.config(bg="#f0f0f0")
+        self.tl_btn.config(bg="#d1d1d1")
+
     # layout type changed
     def plot_changed(self, event):
         self.layout_style = self.plot_selector.get()
-        if self.display_type == "plot":
-            self.plot_in_frame()
-        elif self.display_type == "stats":
-            self.stats_in_frame()
-        elif self.display_type == "animation":
-            self.animation_in_frame()
+        self.refresh_plot()
 
     def rich_club_window(self):
         self.new_window = tk.Toplevel(root)
@@ -528,22 +586,12 @@ class App:
     def kcore_changed(self):
         self.degree = int(self.kcore_entry.get())
         self.new_window.destroy()
-        if self.display_type == "plot":
-            self.plot_in_frame()
-        elif self.display_type == "animation":
-            self.animation_in_frame()
-        else:
-            self.stats_in_frame()        
-
+        self.refresh_plot()
+    
     def rich_club_changed(self):
         self.degree = int(self.rich_club_entry.get())
         self.new_window.destroy()
-        if self.display_type == "plot":
-            self.plot_in_frame()
-        elif self.display_type == "animation":
-            self.animation_in_frame()
-        else:
-            self.stats_in_frame()
+        self.refresh_plot()
         
     def node_changed(self, event):
         self.node_metric = self.node_metric_selector.get()
@@ -555,12 +603,8 @@ class App:
             self.k_core_window()
             return
             
-        if self.display_type == "plot":
-            self.plot_in_frame()
-        elif self.display_type == "stats":
-            self.stats_in_frame()
-        elif self.display_type == "animation":
-            self.animation_in_frame()
+        self.refresh_plot()
+
 
     def cluster_button_command(self):
         if len(self.active_path_list) == 0:

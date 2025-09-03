@@ -223,6 +223,8 @@ class settingsWindow(tk.Toplevel):
             self.app.stats_in_frame()
         elif self.app.display_type == "animation":
             self.app.animation_in_frame()
+        elif self.app.display_type == "temporal layout":
+            self.app.templayout_in_frame()
 
     def on_enter_pressed(self, event):
         edge_thickness_value = self.edge_thickness_entry.get()  

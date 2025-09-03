@@ -70,8 +70,8 @@ def nn_cut(arr, nn = 2):
         nn_arr[i, neighbors_i[i, :nn]] = arr[i, neighbors_i[i, :nn]]
         nn_arr[neighbors_j[:nn, i], i] = arr[neighbors_j[:nn, i], i] 
         # other elements are put to 0 (0.01 for visualization).
-        nn_arr[i, neighbors_i[i, nn:]] = 0.01
-        nn_arr[neighbors_j[nn:, i], i] = 0.01  
+        nn_arr[i, neighbors_i[i, nn:]] = 0.0
+        nn_arr[neighbors_j[nn:, i], i] = 0.0  
 
     return nn_arr
 
@@ -87,7 +87,7 @@ def mnn_cut(arr, nn = 2):
                 array representing the graph with cut edges
     """
     assert nn >= 1, "nn should be a positive integer bigger than 1." # nn = 0 means self ineractions with is trivially true (unless stated otherwise)
-    mnn_arr = np.zeros_like(arr) + 0.01 #0.01 for visualization, to force igraph to keep layout
+    mnn_arr = np.zeros_like(arr) + 0.0 #0.01 for visualization, to force igraph to keep layout
     neighbors_i = np.argsort(-arr, 1) #computing the nearest neighbors for local nn estimation
     neighbors_j = np.argsort(-arr, 0)
     for i in range(arr.shape[1]):
@@ -156,7 +156,7 @@ def read_graph(path_to_file, percentage_threshold = 0.01, mnn = None, return_ig 
                layer_data = inverse(layer_data, rm_fb_loops)
 
             threshold = np.max(layer_data) * (percentage_threshold / 100.0)
-            layer_data = np.where(layer_data < threshold, 0.01, layer_data)  #0.01 for visualization, to force igraph to keep layout
+            layer_data = np.where(layer_data < threshold, 0.0, layer_data)  #0.01 for visualization, to force igraph to keep layout
             if mnn is not None:
                 if mutual:
                     layer_data = mnn_cut(layer_data, mnn) # mutual nearest neighbours
@@ -180,7 +180,7 @@ def read_graph(path_to_file, percentage_threshold = 0.01, mnn = None, return_ig 
            data = inverse(data, rm_fb_loops)
            
         threshold = np.max(data) * (percentage_threshold / 100.0)
-        data = np.where(data < threshold, 0.01, data)
+        data = np.where(data < threshold, 0.0, data)
         if mnn is not None:
             if mutual:
                 data = mnn_cut(data, mnn)
@@ -209,7 +209,7 @@ def randomize_graph(path_to_file, percentage_threshold = 0.01, mnn = None, retur
         if not affinity: # If input data represents distance, need to invert values
             data = inverse(data)
         threshold = np.max(data) * (percentage_threshold / 100.0)
-        data = np.where(data < threshold, 0.01, data)
+        data = np.where(data < threshold, 0.0, data)
         
         if mnn is not None:
             if mutual:
@@ -232,7 +232,7 @@ def randomize_graph(path_to_file, percentage_threshold = 0.01, mnn = None, retur
         if not affinity: # If input data represents distance, need to invert values
             data = inverse(data)
         threshold = np.max(data) * (percentage_threshold / 100.0)
-        data = np.where(data < threshold, 0.01, layer_data)  #0.01 for visualization, to force igraph to keep layout
+        data = np.where(data < threshold, 0.0, layer_data)  #0.01 for visualization, to force igraph to keep layout
         if mnn is not None:
             if mutual:
                 data = mnn_cut(data, mnn)
@@ -904,6 +904,13 @@ def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn =
         for g in graph_data:
             core_size = rich_club_size(g, k_degree)
             node_size.append([core_size])
+            
+    elif node_metric == "k-core":
+        node_size = []
+        k_degree = kwargs["deg"]
+        for g in graph_data:
+            core_size = k_core_size(g, k_degree)
+            node_size.append([core_size])
     else: 
         node_size = []
         for idx, g in enumerate(graph_data):
@@ -914,6 +921,7 @@ def display_stats_multilayer(path_to_file, ax, percentage_threshold = 0.0, mnn =
             total_data.extend(node_size[idx])
             
         _, bins_pos = np.histogram(total_data, bins = bins)
+        colors = [cm(idx/len(graph_data)) for idx in range(len(graph_data))]
         ax.hist(node_size, histtype='bar', stacked=stacked, rwidth = 0.8, color = colors)
         ax.set_ylabel("Count")
         labels_legend = [os.path.basename(path).split(".")[0] for path in path_to_file]
@@ -1140,24 +1148,24 @@ if __name__ == '__main__':
     # plt.show()
 
 # histogram plot example     
-    # f = plt.Figure()
-    # fig, ax = plt.subplots(1, 1)
-    # display_stats([path+file1, path+file2, path+file3, path+file4], ax, mnn = None, deg = 0, percentage_threshold = 0,
-    #               node_metric = "eigenvector centrality", mutual = True, idx = [], node_size = 5, edge_width = 2, bins = 10,
-    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True, show_legend = False)
-    # plt.show()
+    f = plt.Figure()
+    fig, ax = plt.subplots(1, 1)
+    display_stats([path+file1, path+file2, path+file3, path+file4], ax, mnn = 5, deg = 3, percentage_threshold = 0,
+                  node_metric = "k-core", mutual = True, idx = [], node_size = 5, edge_width = 2, bins = 10,
+                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True, show_legend = False)
+    plt.show()
     
 ## animation example  
-    fig, ax = plt.subplots(1, 1)
-    root = tk.Tk()
-    root.resizable(width=True, height=True)
-    root.title("Multilayer graph analysis")
-    display_animation([path+file1, path+file2, path+file3, path+file4], root,  mnn = 5, deg = 0, 
-                      percentage_threshold = 50, layout = "circle",
-                  node_metric = "strength", mutual = True, idx = [], node_size = 50, edge_width = 2,
-                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, node_labels = True, rm_index = False,
-                  node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm)
-    root.mainloop()
+    # fig, ax = plt.subplots(1, 1)
+    # root = tk.Tk()
+    # root.resizable(width=True, height=True)
+    # root.title("Multilayer graph analysis")
+    # display_animation([path+file1, path+file2, path+file3, path+file4], root,  mnn = 5, deg = 0, 
+    #                   percentage_threshold = 50, layout = "circle",
+    #               node_metric = "strength", mutual = True, idx = [], node_size = 50, edge_width = 2,
+    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None, node_labels = True, rm_index = False,
+    #               node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm)
+    # root.mainloop()
 
     
     # plt.show()
