@@ -1,6 +1,6 @@
 # TempNetViz
 
-**TempNetViz** is an interactive GUI designed for exploring, analyzing, and visualizing **temporal graphs** — graphs that evolve over time.
+**TempNetViz** is an interactive GUI designed for exploring, analyzing, and visualizing **temporal graphs** — graphs that evolve over time. This readme provides the essential information for the usage of TempNetViz, for more details see the [documentation](https://cnelias.github.io/TempNetVizDocs.github.io/).
 
 ## Installation & usage
 
@@ -27,7 +27,7 @@ Steps to get started:
 ![Quickstart](https://github.com/KelschLAB/TemporalGraphViz/raw/main/quickstart_numbered.png)
 
 ## Main Functionalities
-
+Here we provide a short description of the main functionnalities of the GUI. For more information, see the [documentation](https://cnelias.github.io/TempNetVizDocs.github.io/)
 ### Structure Visualization
 
 Visualize temporal graphs as a 3D stack to see how connections evolve over time. You can compute various metrics to quantify node importance — important nodes will appear larger.
