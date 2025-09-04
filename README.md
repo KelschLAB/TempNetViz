@@ -24,6 +24,7 @@ Steps to get started:
    You can apply a **graph cut** (edge pruning) for better readability on large graphs.
 4. Switch between **Graph**, **Histogram**, and **Animation** views to gain different insights.
 
+You can apply aesthetic changes (e.g. edge/nodes widths, colors...) to the results via the **settings** button.
 
 ![Quickstart](https://github.com/KelschLAB/TemporalGraphViz/raw/main/quickstart_numbered.png)
 
