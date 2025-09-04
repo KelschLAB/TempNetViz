@@ -28,10 +28,9 @@ from tempnetviz.temporal_layout import plot_temporal_layout
 
 #To-do: 
 #       - put layout button in settings? It is actually not super necessary to have it in main app.
-#       - include link of doc once online in the GUI (setting/ help section)
-#       - make sure that the "Run" instruction in documentation actually works
 
 ###### For future versions: 
+#       - implement recurrent neighbors orderding for temporal layout (see Linhares 2019)
 #       - simplify the metric code in read_graph.py for better readability
 #       - Add dynamic layout for animation, such that nodes are not fixed but can move closer/further to points they are similar to.
 #       - Include compatibility with other formats (right now, only compatible with csv format).
