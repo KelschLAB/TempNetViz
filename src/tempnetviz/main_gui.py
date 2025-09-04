@@ -194,7 +194,7 @@ class App:
         txt += "1. Select the directory/folder where your files are stored with the  'Open'  button.\n"
         txt += "\n2. Then, select the graph file(s) with the 'sub-graph' drop-down menu to start plotting.\n"
         txt += "      You can select files by dragging the mouse, or by holding ctrl and clicking.\n\n"
-        txt += "3. Change the representation with the layout and metric buttons. If you are working with \n"
+        txt += "3. Choose a metric to highlight relevant features of the data. If you are working with \n"
         txt += "      large graphs, apply a graph cut to remove weak edges and improve visibility.\n\n"
         txt += "4. You can switch the result display with the 'multi-layer', 'statistics',\n 'animation' and 'Temp. layout' buttons"
         self.label = tk.Label(self.content_frame, font = 'Helvetica 13 bold', 
