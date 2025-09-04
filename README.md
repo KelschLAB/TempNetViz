@@ -49,17 +49,17 @@ In this example, deep blue corresponds to early times and deep red to the last d
 
 <img src="https://github.com/KelschLAB/TemporalGraphViz/raw/main/histo_view.png" alt="Metrics Distribution" width="70%"/>
 
-### Temporal Layout
-
-You can also display the results as a temporal layout. In this example, the color and thickness of node a shows its strength value. 
-
-<img src="https://github.com/KelschLAB/TemporalGraphViz/raw/main/temporal_layout.png" alt="Temporal Layout" width="100%"/>
-
 ### Graph Animation
 
 Animate the temporal evolution of your graph to better understand dynamics.
 
 <img src="https://github.com/KelschLAB/TemporalGraphViz/raw/main/graph_animation.gif" alt="Graph Animation" width="100%"/>
+
+### Temporal Layout
+
+You can also display the results as a temporal layout. In this example, the color and thickness of node a shows its strength value. 
+
+<img src="https://github.com/KelschLAB/TemporalGraphViz/raw/main/temporal_layout.png" alt="Temporal Layout" width="100%"/>
 
 ## License
 
