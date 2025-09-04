@@ -408,7 +408,7 @@ class App:
                 cb = f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
                 cb.remove()
             
-        f.subplots_adjust(left=0, bottom=0, right=0.948, top=1, wspace=0, hspace=0)
+        # f.subplots_adjust(left=0, bottom=0, right=0.948, top=1, wspace=0, hspace=0)
 
         canvas = FigureCanvasTkAgg(f, master=self.content_frame)
         NavigationToolbar2Tk(canvas, self.content_frame)

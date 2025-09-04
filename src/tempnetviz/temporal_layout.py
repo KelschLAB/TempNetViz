@@ -157,14 +157,16 @@ def plot_temporal_layout(path_to_file, ax=None, percentage_threshold = 0.0, mnn 
         ig.plot(subgraph, target=ax, layout=layout, **visual_style)
         
     ax.set_yticks(range(node_number))
-    ax.set_yticklabels(node_labels)  # Label each tick
+    if node_labels is not None:
+        ax.set_yticklabels(node_labels)  # Label each tick
     ax.set_xticks(range(timesteps))  # Set ticks at each time step position
     ax.set_xticklabels([f'{i+1}' for i in range(timesteps)])  # Label each tick
     ax.set_xlabel('Timesteps')
+    ax.set_ylabel('Node')
     ax.grid(alpha = 0.5)
     
 if __name__ == "__main__":
-    path = "..\\..\\data\\nosemaze\\both_cohorts_1days\\G1\\"
+    path = "..\\..\\data\\nosemaze\\both_cohorts_1days\\G10\\"
     file1 = "interactions_resD1_01.csv"
     file2 = "interactions_resD1_02.csv"
     file3 = "interactions_resD1_03.csv"
@@ -183,6 +185,6 @@ if __name__ == "__main__":
     
     fig, ax = plt.subplots(1, 1, figsize=(12, 6))
     plot_temporal_layout(paths, ax, mnn = 5, deg = 3,
-                         node_size = 10, edge_width = 2, between_layer_edges = False, 
-                         rm_fb_loops=True,  cluster_num = None, node_labels = True, rm_index = True,
-                         node_metric = "k-core", node_cmap = cm.coolwarm, edge_cmap = cm.Greys, scale_edge_width = False)
+                         node_size = 15, edge_width = 5, between_layer_edges = False, 
+                         rm_fb_loops=True,  cluster_num = None, node_labels = False, rm_index = True,
+                         node_metric = "strength", node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm, scale_edge_width = True)
