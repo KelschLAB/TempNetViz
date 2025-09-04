@@ -62,11 +62,11 @@ The second mode displays the graph associated with each time step sequentially, 
 
 The third mode is the temporal layout `@linhares2023visualisation`. In this view, nodes are are arranged along the y-axis, and edges are drawn at each time step (see Fig. 2). The ordering of the nodes along the y-axis is chosen to minimize overlap between edges and to enhance clarity. Unlike other layouts, it does not cluster strongly connected nodes, so the underlying graph structure is less evident. Instead, it emphasizes a clear depiction of global activity patterns and their evolution over time.
 
-![Fig. 2: Example of temporal layout. Each column represents a time step, each row a node. Edges between two nodes are shown via curved lines. Nodes are ordered along the y-axis to minimize overlap between edges and to improve clarity.](temporal_layout.png){ width=50% }
+![Fig. 2: Example of temporal layout. Each column represents a time step, each row a node. Edges between two nodes are shown via curved lines. Nodes are ordered along the y-axis to minimize overlap between edges and to improve clarity.](temporal_layout.png){ width=80% }
 
 Finally, TempNetViz allows users to plot the values of various graph descriptors (see the metrics section in the [documentation]) as a function of time using stacked histograms. This mode discards structural information entirely, instead emphasizing how global properties evolve (see Fig. 3).
 
-![Fig. 3: Example of stacked histogram representation. Colors indicate time steps, from deep blue (first time step) to deep red (last time step). In this example, the highest strength values (>1500) appear only at later time steps, indicating an overall increase in activity toward the end of the experiment.](histo_view.png){ width=50% }
+![Fig. 3: Example of stacked histogram representation. Colors indicate time steps, from deep blue (first time step) to deep red (last time step). In this example, the highest strength values (>1500) appear only at later time steps, indicating an overall increase in activity toward the end of the experiment.](histo_view.png){ width=70% }
 
 In addition to the main data representations, TempNetViz allows computation of a range of standard graph metrics to characterize the importance of nodes at each time step in the temporal network. Nodes are sized and colored according to the value of the selected metric, and both node and edge colors can be customized using different colormaps to enhance visibility. For example, in Fig. 1, nodes are colored by their strength, a metric that quantifies the sum of the weights of all edges connected to a node.
 
