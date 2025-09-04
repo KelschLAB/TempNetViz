@@ -20,9 +20,10 @@ Steps to get started:
 
 1. Click **Open** in the GUI to select the folder containing your `.csv` files.
 2. Use the **Sub-graph selector** to choose one or multiple layers to visualize or analyze.
-3. Adjust the **layout** and **metrics** to explore structural properties.
-4. Optionally, apply a **graph cut** for better readability on large graphs.
-5. Switch between **Graph**, **Histogram**, and **Animation** views to gain different insights.
+3. Adjust the **metrics** to explore structural properties of your data.
+   You can apply a **graph cut** (edge pruning) for better readability on large graphs.
+4. Switch between **Graph**, **Histogram**, and **Animation** views to gain different insights.
+
 
 ![Quickstart](https://github.com/KelschLAB/TemporalGraphViz/raw/main/quickstart_numbered.png)
 
