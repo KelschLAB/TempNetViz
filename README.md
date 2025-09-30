@@ -10,7 +10,7 @@ You can install TempNetViz with pip using:
 pip install tempnetviz
 ```
 
-To start the GUI:
+If you do not want to code, the package also comes with a GUI that can be start via:
 
 ```bash
 python -m tempnetviz.main_gui
@@ -19,6 +19,9 @@ python -m tempnetviz.main_gui
 ## Quickstart
 
 Your data should be stored in a single folder as **.csv files**, where each file represents the graph at a specific time point.
+
+An overview of the main usages and functionalities is given in [src/tempnetviz/examples.py](https://github.com/KelschLAB/TempNetViz/blob/main/src/tempnetviz/examples.py).
+If you do not want to code, start the GUI with ```python -m tempnetviz.main_gui``` and follow the instructions below.
 
 Steps to get started:
 
