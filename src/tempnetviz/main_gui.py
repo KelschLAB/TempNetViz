@@ -114,7 +114,7 @@ class App:
         settings_button["menu"]= settings_button.menu  
         settings_button.menu.add_command(label="Settings", command=self.settings_window)
         settings_button.menu.add_command(label="Reset",command = self.reset)
-        link = "https://stackoverflow.com/questions/71458060/how-to-open-a-link-with-an-specific-button-tkinter" #link to docs
+        link = "https://cnelias.github.io/TempNetVizDocs.github.io/" #link to docs
         settings_button.menu.add_command(label="Help", command =lambda: webbrowser.open(link))
         settings_button.place(relx=0.53,rely = 0.5, relwidth=0.43, relheight=0.35)
         
