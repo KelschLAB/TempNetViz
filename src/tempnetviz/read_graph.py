@@ -443,14 +443,54 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
     else:
         node_labels = None
         
+    if "cluster_num" in kwargs and type(kwargs["cluster_num"]) == int:
+        cluster_num = kwargs["cluster_num"]
+    else:
+        cluster_num = None
+        
+    if "node_size" in kwargs:
+        node_size = kwargs["node_size"]
+    else:
+        node_size = None
+        
+    if "edge_width" in kwargs and type(kwargs["edge_width"]) == int:
+        edge_width = kwargs["edge_width"]
+    else:
+        edge_width = None
+        
+    if "scale_edge_width" in kwargs and kwargs["scale_edge_width"]:
+        scale_edge_width = kwargs["edge_width"]
+    else:
+        scale_edge_width = False
+        
+    if "between_layer_edges" in kwargs and kwargs["between_layer_edges"]:
+        between_layer_edges = kwargs["between_layer_edges"]
+    else:
+        between_layer_edges = False
+        
+    if "show_planes" in kwargs and kwargs["show_planes"]:
+        show_planes = kwargs["show_planes"]
+    else:
+        show_planes = False
+    
+    if "edge_cmap" in kwargs:
+        edge_cmap = kwargs["edge_cmap"]
+    else:
+        edge_cmap = cm.Greys
+        
     if len(path_to_file) > 1 and not avg_graph:
+        if "node_cmap" in kwargs:
+            node_cmap = kwargs["node_cmap"]
+        else:
+            node_cmap = cm.Reds
+            
         layer_labels = kwargs["layer_labels"] if "layer_labels" in kwargs else None
         display_graph_3d(path_to_file, ax = ax, percentage_threshold = percentage_threshold, mnn = mnn, affinity = affinity, \
                          rm_fb_loops = rm_fb_loops, mutual = mutual, layout = layout_style, node_metric = kwargs["node_metric"], idx = kwargs["idx"], \
-                         cluster_num = kwargs["cluster_num"], layer_labels = layer_labels, node_labels = node_labels, deg = kwargs["deg"], 
-                         node_size = kwargs["node_size"], edge_width = kwargs["edge_width"], scale_edge_width = kwargs["scale_edge_width"],
-                         between_layer_edges = kwargs["between_layer_edges"], rm_index = rm_index,
-                         show_planes = kwargs["show_planes"], edge_cmap = kwargs["edge_cmap"], node_cmap = kwargs["node_cmap"])
+                         cluster_num = cluster_num, layer_labels = layer_labels, node_labels = node_labels, deg = kwargs["deg"], 
+                         node_size = node_size, edge_width = edge_width, scale_edge_width = scale_edge_width,
+                         between_layer_edges = between_layer_edges, rm_index = rm_index,
+                         show_planes = show_planes, edge_cmap = edge_cmap, node_cmap = node_cmap)
         return
     else:
         data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, mutual = mutual, \
@@ -1115,13 +1155,6 @@ if __name__ == '__main__':
     file3 = "interactions_resD1_03.csv"
     file4 = "interactions_resD1_04.csv"
     file5 = "interactions_resD1_05.csv"
-    
-    # path = "..\\..\\data\\random_graph\\"
-    # file1 = "rand_graph1.csv"
-    # file2 = "rand_graph2.csv"
-    # file3 = "rand_graph3.csv"
-    # file4 = "rand_graph4.csv"
-    # file5 = "rand_graph5.csv"
 
 # community clustering example. The indices provided by this can be passed to other plotting functions for display
 #     data = read_graph([path+file1], mnn = 3, return_ig=False)[0]
@@ -1132,7 +1165,7 @@ if __name__ == '__main__':
 #     c = community_clustering([path+file1, path+file2, path+file3, path+file4], algorithm = "infomap", mnn = 4, mutual = True, affinity = True)
 #     print(c)
     
-## 1D plot example     
+# # 1D plot example     
 #     f = plt.Figure()
 #     fig, ax = plt.subplots(1, 1)
 #     display_graph([path+file1], ax, mnn = None, deg = 0, percentage_threshold = 0,
@@ -1168,14 +1201,13 @@ if __name__ == '__main__':
 #                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True, show_legend = False)
 #     plt.show()
 
-# animation example  
-    anim = display_animation([path+file1, path+file2, path+file3, path+file4], root = None, mnn = 5, deg = 0, 
-                      percentage_threshold = 50, layout = "circle",
-                  node_metric = "strength", mutual = True, idx = [], node_size = 50, edge_width = 2,
-                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, node_labels = True, rm_index = True,
-                  node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm)
-    plt.show()
+# # animation example  
+#     anim = display_animation([path+file1, path+file2, path+file3, path+file4], root = None, mnn = 5, deg = 0, 
+#                       percentage_threshold = 50, layout = "circle",
+#                   node_metric = "strength", mutual = True, idx = [], node_size = 50, edge_width = 2,
+#                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, node_labels = True, rm_index = True,
+#                   node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm)
+#     plt.show()
 
-    
 
 

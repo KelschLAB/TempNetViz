@@ -1,6 +1,4 @@
 import numpy as np
-
-
 import matplotlib.pyplot as plt
 import matplotlib
 import igraph as ig
@@ -27,7 +25,6 @@ import pandas as pd
 import time 
 import matplotlib.colors as mcolors
 
-
 if __name__ == "__main__":
     path = "..\\..\\data\\nosemaze\\both_cohorts_1days\\G10\\"
     file1 = "interactions_resD1_01.csv"
@@ -44,7 +41,7 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(1, 1)
     display_graph([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 0, percentage_threshold = 0,
                   node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2, avg_graph = True,
-                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
+                  scale_edge_width = True, between_layer_edges = False, rm_index = True,
                   node_labels = False, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.Greens)
     plt.title("Averaged graph over 5 days")
     plt.show()
@@ -54,9 +51,8 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(1, 1)
     ax = fig.add_subplot(111, projection='3d')
     display_graph([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 3, percentage_threshold = 0,
-                  node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2,
-                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
-                  node_labels = False, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.Greens)
+                  node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2, show_planes = True,
+                  scale_edge_width = True, between_layer_edges = False, rm_index = True)
     plt.title("Stacked view of 5 experimental days")
     plt.show()
     
@@ -66,7 +62,7 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(1, 1)
     display_stats([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 3, percentage_threshold = 0,
                   node_metric = "strength", mutual = True, idx = [], node_size = 5, edge_width = 2, bins = 5,
-                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True, show_legend = False)
+                  scale_edge_width = True, between_layer_edges = False, rm_index = True, show_planes = True, show_legend = False)
     plt.title("Strength histogram\n color codes for time (in days)")
     plt.show()
     
@@ -75,7 +71,7 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(1, 1)
     display_stats([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 3, percentage_threshold = 0,
                   node_metric = "strength", mutual = True, idx = [], node_size = 5, edge_width = 2, bins = 5, stacked = False,
-                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True, show_legend = False)
+                  scale_edge_width = True, between_layer_edges = False, rm_index = True, show_planes = True, show_legend = False)
     plt.title("Strength histogram\n color codes for time (in days)")
     plt.show()
 
@@ -86,7 +82,7 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(1, 1, figsize=(12, 6))
     plot_temporal_layout(paths, ax, mnn = 5, deg = 3,
                          node_size = 15, edge_width = 5, between_layer_edges = False, 
-                         rm_fb_loops=True,  cluster_num = None, node_labels = False, rm_index = True,
+                         rm_fb_loops=True, node_labels = False, rm_index = True,
                          node_metric = "strength", node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm, scale_edge_width = True)
     plt.title("Temporal layout over 7 experimental days")
     plt.show()
@@ -95,7 +91,7 @@ if __name__ == "__main__":
     anim = display_animation([path+file1, path+file2, path+file3, path+file4], root = None, mnn = 5, deg = 0, 
                       percentage_threshold = 50, layout = "circle",
                   node_metric = "strength", mutual = True, idx = [], node_size = 50, edge_width = 2,
-                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, node_labels = True, rm_index = True,
+                  scale_edge_width = True, between_layer_edges = False, node_labels = True, rm_index = True,
                   node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm)
     
 ## community clustering example. The indices provided by this can be passed to other plotting functions for display
