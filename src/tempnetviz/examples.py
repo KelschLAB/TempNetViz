@@ -38,7 +38,8 @@ if __name__ == "__main__":
     file6 = "interactions_resD1_06.csv"
     file7 = "interactions_resD1_07.csv"
 
-## Averaged graph    
+## Graph display
+    # Averaged graph: calling the 'display_graph' function with avg_graph = True as argument    
     f = plt.Figure()
     fig, ax = plt.subplots(1, 1)
     display_graph([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 0, percentage_threshold = 0,
@@ -48,7 +49,7 @@ if __name__ == "__main__":
     plt.title("Averaged graph over 5 days")
     plt.show()
     
-## stacked plot example     
+    # Stacked plot example. To apply a graph cut, change 'mnn' to an integer > 1
     f = plt.Figure()
     fig, ax = plt.subplots(1, 1)
     ax = fig.add_subplot(111, projection='3d')
@@ -59,11 +60,21 @@ if __name__ == "__main__":
     plt.title("Stacked view of 5 experimental days")
     plt.show()
     
-## histogram plot example     
+## Histograms
+    # Stacked histogram plot example, via Stacked = True  
     f = plt.Figure()
     fig, ax = plt.subplots(1, 1)
     display_stats([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 3, percentage_threshold = 0,
                   node_metric = "strength", mutual = True, idx = [], node_size = 5, edge_width = 2, bins = 5,
+                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True, show_legend = False)
+    plt.title("Strength histogram\n color codes for time (in days)")
+    plt.show()
+    
+    # Side by side histogram plot example, using Stacked = false  
+    f = plt.Figure()
+    fig, ax = plt.subplots(1, 1)
+    display_stats([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 3, percentage_threshold = 0,
+                  node_metric = "strength", mutual = True, idx = [], node_size = 5, edge_width = 2, bins = 5, stacked = False,
                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True, show_legend = False)
     plt.title("Strength histogram\n color codes for time (in days)")
     plt.show()
