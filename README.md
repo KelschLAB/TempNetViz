@@ -10,7 +10,7 @@ You can install TempNetViz with pip using:
 pip install tempnetviz
 ```
 
-To start the GUI:
+If you do not want to code, the package also comes with a GUI that can be start via:
 
 ```bash
 python -m tempnetviz.main_gui
