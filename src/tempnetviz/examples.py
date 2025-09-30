@@ -107,3 +107,15 @@ if __name__ == "__main__":
     c = community_clustering([path+file1, path+file2, path+file3, path+file4], algorithm = "infomap", mnn = 4, mutual = True, affinity = True)
     print(c)
     
+## Example of rich club analysis, with graph cut of mnn = 3 and degree = 3
+    datapath = "..\\..\\data\\nosemaze\\both_cohorts_3days\\G1\\"
+    fig, axs = plt.subplots(5, 1, figsize=(4, 8)) #putting all results directly on same figure
+    for i in range(5):
+        file = "interactions_resD3_"+str(i+1)+".csv"
+        display_graph([datapath+file], axs[i], mnn = 3, node_metric = "rich-club", deg = 3, mutual = True,
+                          layout = "circle", node_size = 12, node_labels = None, edge_width = 1.5, scale_edge_width = False)
+
+    axs[0].set_title("Rich-club (RC) analysis:\nEach graph represent an experimental day,\nBold nodes are part of RC\nSome nodes are consistently part of RC")
+    # axs[0].set_title(labels[graph_idx]+", total approaches: "+str(total), fontsize=16)
+    plt.show()
+    
