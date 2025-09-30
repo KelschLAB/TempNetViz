@@ -20,11 +20,9 @@ if __name__ == "__main__" and __package__ is None:
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
     __package__ = "tempnetviz"
     
-# from .multilayer_plot import *
 from .graph_animation import *
 from .temporal_layout import *
 from .read_graph import *
-# from .
 import pandas as pd
 import time 
 import matplotlib.colors as mcolors
@@ -40,16 +38,17 @@ if __name__ == "__main__":
     file6 = "interactions_resD1_06.csv"
     file7 = "interactions_resD1_07.csv"
 
-    ## 1D plot example     
+## Averaged graph    
     f = plt.Figure()
     fig, ax = plt.subplots(1, 1)
-    display_graph([path+file1], ax, mnn = None, deg = 0, percentage_threshold = 0,
-                  node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2,
+    display_graph([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 0, percentage_threshold = 0,
+                  node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2, avg_graph = True,
                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
                   node_labels = False, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.Greens)
+    plt.title("Averaged graph over 5 days")
     plt.show()
     
-    ## stacked plot example     
+## stacked plot example     
     f = plt.Figure()
     fig, ax = plt.subplots(1, 1)
     ax = fig.add_subplot(111, projection='3d')
@@ -57,17 +56,19 @@ if __name__ == "__main__":
                   node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2,
                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
                   node_labels = False, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.Greens)
+    plt.title("Stacked view of 5 experimental days")
     plt.show()
     
-    # histogram plot example     
+## histogram plot example     
     f = plt.Figure()
     fig, ax = plt.subplots(1, 1)
     display_stats([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 3, percentage_threshold = 0,
                   node_metric = "strength", mutual = True, idx = [], node_size = 5, edge_width = 2, bins = 5,
                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True, show_legend = False)
+    plt.title("Strength histogram\n color codes for time (in days)")
     plt.show()
 
-    # Temporal layout example
+## Temporal layout example
     paths = [path+file1, path+file2,path+file3, path+file4, 
             path+file5,  path+file6,  path+file7]
     
@@ -76,16 +77,17 @@ if __name__ == "__main__":
                          node_size = 15, edge_width = 5, between_layer_edges = False, 
                          rm_fb_loops=True,  cluster_num = None, node_labels = False, rm_index = True,
                          node_metric = "strength", node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm, scale_edge_width = True)
+    plt.title("Temporal layout over 7 experimental days")
     plt.show()
     
-    # animation example  
+## animation example  
     anim = display_animation([path+file1, path+file2, path+file3, path+file4], root = None, mnn = 5, deg = 0, 
                       percentage_threshold = 50, layout = "circle",
                   node_metric = "strength", mutual = True, idx = [], node_size = 50, edge_width = 2,
                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, node_labels = True, rm_index = True,
                   node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm)
     
-    # community clustering example. The indices provided by this can be passed to other plotting functions for display
+## community clustering example. The indices provided by this can be passed to other plotting functions for display
     data = read_graph([path+file1], mnn = 3, return_ig=False)[0]
     if isSymmetric(data):
         g = ig.Graph.Weighted_Adjacency(data, mode='undirected')
