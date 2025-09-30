@@ -20,11 +20,7 @@ class GraphAnimator:
         self.interframe = interframe_time
         self.current_frame = 0
         if parent_frame is None:
-            self.root = tk.Tk()
-            self.root.resizable(width=True, height=True)
-            self.root.title("Multilayer graph analysis")
-            self.parent_frame = tk.Frame(self.root)
-            self.root.mainloop()
+            return
 
         else:
             self.parent_frame = parent_frame
@@ -146,5 +142,48 @@ class GraphAnimator:
             self.animation.event_source.stop()
             self.is_playing = False
     
+    def matplotlib_animation(self):
+        """Run the animation in a standalone matplotlib window (no Tkinter)."""
+        import matplotlib.pyplot as plt
+        from matplotlib.animation import FuncAnimation
+        import numpy as np
+
+        plt.ioff()
+        fig, ax = plt.subplots()
+        ax.axis("off")
+
+        # Precompute images directly here
+        frame_images = []
+        for idx, g in enumerate(self.graphs):
+            fig_tmp, ax_tmp = plt.subplots()
+            ig.plot(g, target=ax_tmp, layout=self.layout.coords, **self.styles[idx])
+            ax_tmp.axis("off")
+            fig_tmp.canvas.draw()
+
+            buf = fig_tmp.canvas.buffer_rgba()
+            img = np.asarray(buf)
+            frame_images.append(img)
+
+            plt.close(fig_tmp)
+
+        # Initial frame
+        img_obj = ax.imshow(frame_images[0])
+
+        def animate(frame):
+            img_obj.set_data(frame_images[frame])
+            return [img_obj]
+
+        # Store animation object on self so it is not garbage collected
+        self.animation = FuncAnimation(
+            fig,
+            animate,
+            frames=len(frame_images),
+            interval=self.interframe,
+            blit=False,   # safer across backends
+            repeat=True
+        )
+
+        plt.show()
+        return self.animation
 
  

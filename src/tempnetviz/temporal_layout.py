@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os, sys
 from copy import copy
+
 if __name__ == "__main__" and __package__ is None:
     # Go up one level to the package root
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))

@@ -1100,82 +1100,82 @@ def display_animation(path_to_file, parent_frame = None, percentage_threshold = 
         
     layout = layers[0].layout(layout_style)
     animation = GraphAnimator(layers, layout, styles, parent_frame, interframe)
-    f, ax = animation.get_fig()
-    return f, ax
+    animation = animation.matplotlib_animation()
+    if parent_frame != None:
+        f, ax = animation.get_fig()
+        return f, ax
+    else:
+        return animation
 
 if __name__ == '__main__':
 
-    # path = "..\\..\\data\\nosemaze\\both_cohorts_1days\\G1\\"
-    # file1 = "interactions_resD1_01.csv"
-    # file2 = "interactions_resD1_02.csv"
-    # file3 = "interactions_resD1_03.csv"
-    # file4 = "interactions_resD1_04.csv"
+    path = "..\\..\\data\\nosemaze\\both_cohorts_1days\\G10\\"
+    file1 = "interactions_resD1_01.csv"
+    file2 = "interactions_resD1_02.csv"
+    file3 = "interactions_resD1_03.csv"
+    file4 = "interactions_resD1_04.csv"
+    file5 = "interactions_resD1_05.csv"
     
-    path = "..\\..\\data\\random_graph\\"
-    file1 = "rand_graph1.csv"
-    file2 = "rand_graph2.csv"
-    file3 = "rand_graph3.csv"
-    file4 = "rand_graph4.csv"
-    file5 = "rand_graph5.csv"
+    # path = "..\\..\\data\\random_graph\\"
+    # file1 = "rand_graph1.csv"
+    # file2 = "rand_graph2.csv"
+    # file3 = "rand_graph3.csv"
+    # file4 = "rand_graph4.csv"
+    # file5 = "rand_graph5.csv"
 
-    # data = read_graph([path+file1], mnn = 3, return_ig=False)[0]
-    # if isSymmetric(data):
-    #     g = ig.Graph.Weighted_Adjacency(data, mode='undirected')
-    # else:
-    #     g = ig.Graph.Weighted_Adjacency(data, mode='directed')
-    
-    #  = community_clustering([path+file1, path+file2, path+file3, path+file4], algorithm = "infomap", mnn = 4, mutual = True, affinity = True)
-    # print(c)
-    
+# community clustering example. The indices provided by this can be passed to other plotting functions for display
+#     data = read_graph([path+file1], mnn = 3, return_ig=False)[0]
+#     if isSymmetric(data):
+#         g = ig.Graph.Weighted_Adjacency(data, mode='undirected')
+#     else:
+#         g = ig.Graph.Weighted_Adjacency(data, mode='directed')
+#     c = community_clustering([path+file1, path+file2, path+file3, path+file4], algorithm = "infomap", mnn = 4, mutual = True, affinity = True)
+#     print(c)
     
 ## 1D plot example     
-    # f = plt.Figure()
-    # fig, ax = plt.subplots(1, 1)
-    # display_graph([path+file1], ax, mnn = None, deg = 0, percentage_threshold = 50,
-    #               node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2,
-    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
-    #               node_labels = False, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.Greens)
-    # plt.show()
+#     f = plt.Figure()
+#     fig, ax = plt.subplots(1, 1)
+#     display_graph([path+file1], ax, mnn = None, deg = 0, percentage_threshold = 0,
+#                   node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2,
+#                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
+#                   node_labels = False, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.Greens)
+#     plt.show()
 
-## stacked plot example     
-    # f = plt.Figure()
-    # fig, ax = plt.subplots(1, 1)
-    # ax = fig.add_subplot(111, projection='3d')
-    # display_graph([path+file1, path+file2], ax, mnn = None, deg = 0, percentage_threshold = 50,
-    #               node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2,
-    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
-    #               node_labels = False, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.Greens)
-    # plt.show()
+# ## stacked plot example     
+#     f = plt.Figure()
+#     fig, ax = plt.subplots(1, 1)
+#     ax = fig.add_subplot(111, projection='3d')
+#     display_graph([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 3, percentage_threshold = 0,
+#                   node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2,
+#                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
+#                   node_labels = False, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.Greens)
+#     plt.show()
 
-# histogram plot example     
-    f = plt.Figure()
-    fig, ax = plt.subplots(1, 1)
-    display_stats([path+file1, path+file2, path+file3, path+file4], ax, mnn = 5, deg = 3, percentage_threshold = 0,
-                  node_metric = "k-core", mutual = True, idx = [], node_size = 5, edge_width = 2, bins = 10,
-                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True, show_legend = False)
+# # histogram plot example     
+#     f = plt.Figure()
+#     fig, ax = plt.subplots(1, 1)
+#     display_stats([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 3, percentage_threshold = 0,
+#                   node_metric = "strength", mutual = True, idx = [], node_size = 5, edge_width = 2, bins = 5,
+#                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True, show_legend = False)
+#     plt.show()
+    
+    
+# # temporal layout example
+#     f = plt.Figure()
+#     fig, ax = plt.subplots(1, 1)
+#     display_stats([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 3, percentage_threshold = 0,
+#                   node_metric = "strength", mutual = True, idx = [], node_size = 5, edge_width = 2, bins = 5,
+#                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True, show_planes = True, show_legend = False)
+#     plt.show()
+
+# animation example  
+    anim = display_animation([path+file1, path+file2, path+file3, path+file4], root = None, mnn = 5, deg = 0, 
+                      percentage_threshold = 50, layout = "circle",
+                  node_metric = "strength", mutual = True, idx = [], node_size = 50, edge_width = 2,
+                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, node_labels = True, rm_index = True,
+                  node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm)
     plt.show()
-    
-## animation example  
-    # fig, ax = plt.subplots(1, 1)
-    # root = tk.Tk()
-    # root.resizable(width=True, height=True)
-    # root.title("Multilayer graph analysis")
-    # display_animation([path+file1, path+file2, path+file3, path+file4], root,  mnn = 5, deg = 0, 
-    #                   percentage_threshold = 50, layout = "circle",
-    #               node_metric = "strength", mutual = True, idx = [], node_size = 50, edge_width = 2,
-    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None, node_labels = True, rm_index = False,
-    #               node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm)
-    # root.mainloop()
 
     
-    # plt.show()
-    # c = display_stats([path+file1, path+file2, path+file3], ax = ax, mnn = 4, node_metric = "rich-club", deg = 2)
-    # g = read_graph(path+file, return_ig=True)
-    # display_graph([path+"\\interactions_resD7_1.csv", path+"\\interactions_resD7_1.csv"], a, node_metric = "closeness", deg =3, cluster_num = 2, idx = [1, 1, 1, 0,0,1,1,1,1,1])
-    
-# clusterer = graphClusterer(D, True, "fully connected")
-# cluster_num = 2
-# clusterer.k_elbow_curve(a)
-# nn = 4
-# _, idx, _, _ = clusterer.clustering(cluster_num, isAffinity = True)
-# clusterer.sigma_grid_search(a, 30, 2)
+
+
