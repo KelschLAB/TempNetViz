@@ -30,6 +30,7 @@ from tempnetviz.temporal_layout import plot_temporal_layout
 #       - put layout button in settings? It is actually not super necessary to have it in main app.
 #       - closeness sometimes crashes after graph cut. Let the user know with a pop-up!
 #       - grey out 'layout' button when temporal layout is active
+# now, when showing animation with GUI, it creates a separate plot. fix that.
 
 ###### For future versions: 
 #       - implement recurrent neighbors orderding for temporal layout (see Linhares 2019)

@@ -34,6 +34,13 @@ if __name__ == "__main__":
     file5 = "interactions_resD1_05.csv"
     file6 = "interactions_resD1_06.csv"
     file7 = "interactions_resD1_07.csv"
+    file8 = "interactions_resD1_08.csv"
+    file9 = "interactions_resD1_09.csv"
+    file10 = "interactions_resD1_10.csv"
+    file11 = "interactions_resD1_11.csv"
+    file12 = "interactions_resD1_12.csv"
+    file13 = "interactions_resD1_13.csv"
+    file14 = "interactions_resD1_14.csv"
 
 ## Graph display
     # Averaged graph: calling the 'display_graph' function with avg_graph = True as argument    
@@ -88,11 +95,15 @@ if __name__ == "__main__":
     plt.show()
     
 ## animation example  
-    anim = display_animation([path+file1, path+file2, path+file3, path+file4], root = None, mnn = 5, deg = 0, 
-                      percentage_threshold = 50, layout = "circle",
-                  node_metric = "strength", mutual = True, idx = [], node_size = 50, edge_width = 2,
-                  scale_edge_width = True, between_layer_edges = False, node_labels = True, rm_index = True,
-                  node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm)
+    files = [path+file1, path+file2, path+file3, path+file4, path+file5, path+file6, path+file7, path+file8, path+file9, path+file10,
+             path+file11, path+file12, path+file13, path+file14]
+    anim = display_animation(files, root = None, mnn = None, deg = 0, 
+                      percentage_threshold = 0, layout = "circle",
+                  node_metric = "strength", mutual = True, idx = [], node_size = 40, edge_width = 2,
+                  scale_edge_width = False, between_layer_edges = False, node_labels = True, rm_index = True,
+                  node_cmap = cm.Grays, edge_cmap = cm.Grays)
+    # anim.save(r"oath_to_save\interactions.gif", writer="pillow", fps=2)
+    
     
 ## community clustering example. The indices provided by this can be passed to other plotting functions for display
     data = read_graph([path+file1], mnn = 3, return_ig=False)[0]
@@ -112,6 +123,6 @@ if __name__ == "__main__":
                           layout = "circle", node_size = 12, node_labels = None, edge_width = 1.5, scale_edge_width = False)
 
     axs[0].set_title("Rich-club (RC) analysis:\nEach graph represent an experimental day,\nBold nodes are part of RC\nSome nodes are consistently part of RC")
-    # axs[0].set_title(labels[graph_idx]+", total approaches: "+str(total), fontsize=16)
+    # axs[0].set_title(labels[graph_idx]+", total interactions: "+str(total), fontsize=16)
     plt.show()
     

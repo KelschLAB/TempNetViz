@@ -165,7 +165,10 @@ def read_graph(path_to_file, percentage_threshold = 0.01, mnn = None, return_ig 
 
             data.append(layer_data)
         if return_ig: # return_ig specifies if the output should be returned as an ig.Graph.
-            layers = [ig.Graph.Weighted_Adjacency(d, mode='directed') for d in data]
+            layers = []
+            for d in data:
+                mode = 'undirected' if isSymmetric(d) else 'directed'
+                layers.append(ig.Graph.Weighted_Adjacency(d, mode=mode))
             return layers
         return data
     
