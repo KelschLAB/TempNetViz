@@ -59,7 +59,7 @@ if __name__ == "__main__":
     ax = fig.add_subplot(111, projection='3d')
     display_graph([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 3, percentage_threshold = 0,
                   node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2, show_planes = True,
-                  scale_edge_width = True, between_layer_edges = False, rm_index = True)
+                  scale_edge_width = True, between_layer_edges = True, rm_index = True)
     plt.title("Stacked view of 5 experimental days")
     plt.show()
     
@@ -102,7 +102,7 @@ if __name__ == "__main__":
                   node_metric = "strength", mutual = True, idx = [], node_size = 40, edge_width = 2,
                   scale_edge_width = False, between_layer_edges = False, node_labels = True, rm_index = True,
                   node_cmap = cm.Grays, edge_cmap = cm.Grays)
-    # anim.save(r"oath_to_save\interactions.gif", writer="pillow", fps=2)
+    # anim.save(r"path_to_save\interactions.gif", writer="pillow", fps=2)
     
     
 ## community clustering example. The indices provided by this can be passed to other plotting functions for display

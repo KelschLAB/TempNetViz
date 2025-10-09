@@ -306,7 +306,7 @@ class App:
             a.set_box_aspect((2,2,1), zoom=1.5)
         else:
             a = f.add_subplot(111)
-            
+                       
         display_graph(self.path_to_file, a, percentage_threshold = self.percentage_threshold, mnn = self.mnn_number, mutual = self.mutual, \
                       avg_graph = self.view_type == "avg", affinity = self.edge_type == "affinity",  rm_fb_loops = self.remove_loops, \
                       layout = self.layout_style, node_metric = self.node_metric, rm_index = self.rm_index, \

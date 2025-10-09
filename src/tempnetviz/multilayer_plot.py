@@ -89,7 +89,7 @@ class LayeredNetworkGraph(object):
             else:
                 g_edge_width = np.array([1 if w > 0.01 else 0 for w in weights])*default_edge_width
             self.edge_width.extend(g_edge_width)
-            self.alphas.extend(self.rescale(np.array([w for w in weights]), 0.5)+0.5)
+            self.alphas.extend(self.rescale(np.array([w for w in weights]), 0.6)+0.4)
         for graph_index, d in enumerate(self.data):
             self.symmetry.extend([self.isSymmetric(d) for i in range(len(self.graphs[graph_index].edges))])
                 
@@ -183,7 +183,7 @@ class LayeredNetworkGraph(object):
         # self.ax.add_collection3d(line_collection)
         counter = 0
         for source, target in edges:
-            if self.symmetry[counter] or not arrow:
+            if not arrow or self.symmetry[counter]:
                 style = "-"
             else:
                 style = '-|>'
@@ -205,10 +205,11 @@ class LayeredNetworkGraph(object):
             else:
                 lw = 1
             if lw != 0:
+                alpha = kwargs["alpha"] if "alpha" in kwargs else self.alphas[counter]
                 x, y, z = self.node_positions[source]
                 u, v, w = self.node_positions[target]
                 # self.ax.plot([x, u], [y, v], [z, w])
-                arrow_prop_dict = dict(mutation_scale=20, arrowstyle=style, shrinkA=10, shrinkB=5, alpha = self.alphas[counter], linestyle = ls, color = c, lw = lw)
+                arrow_prop_dict = dict(mutation_scale=20, arrowstyle=style, shrinkA=10, shrinkB=5, alpha = alpha, linestyle = ls, color = c, lw = lw)
                 a = Arrow3D([x, u], [y, v], [z, w], **arrow_prop_dict)
                 self.ax.add_artist(a)
             counter += 1
@@ -241,7 +242,7 @@ class LayeredNetworkGraph(object):
                 self.ax.text(x+0.15*offset_x, y+0.15*offset_y, 0, node_labels[node], *args, **kwargs)
 
     def draw(self):
-        self.draw_edges(self.edges_within_layers, arrow = True, alpha=0.7, linestyle='-', zorder=2
+        self.draw_edges(self.edges_within_layers, arrow = True, linestyle='-', zorder=2
                         , linewidths=self.edge_width, facecolor=self.edge_colors,  colors=self.edge_colors)
         if self.between_layer_edges:
             self.draw_edges(self.edges_between_layers, arrow = False, color='k', alpha=0.2, linestyle='--', zorder=2, lw = 1)
