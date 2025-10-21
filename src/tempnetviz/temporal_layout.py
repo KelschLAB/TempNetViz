@@ -159,7 +159,7 @@ def plot_temporal_layout(path_to_file, ax=None, percentage_threshold = 0.0, mnn 
         
     ax.set_yticks(range(node_number))
     if node_labels is not None:
-        ax.set_yticklabels([node_labels[int(idx)] for idx in order_y[::-1]])  # Label each tick
+        ax.set_yticks(order_y, node_labels)  # Label each tick
     ax.set_xticks(range(timesteps))  # Set ticks at each time step position
     ax.set_xticklabels([f'{i+1}' for i in range(timesteps)])  # Label each tick
     ax.set_xlabel('Timesteps')
@@ -183,9 +183,10 @@ if __name__ == "__main__":
     paths = [path+file1, path+file2,path+file3, path+file4, 
             path+file5,  path+file6,  path+file7, path+file8
             , path+file9, path+file10, path+file11, path+file12]
+
     
     fig, ax = plt.subplots(1, 1, figsize=(12, 6))
     plot_temporal_layout(paths, ax, mnn = 5, deg = 3,
                          node_size = 15, edge_width = 5, between_layer_edges = False, 
-                         rm_fb_loops=True,  cluster_num = None, node_labels = False, rm_index = True,
+                         rm_fb_loops=True,  cluster_num = None, node_labels = True, rm_index = True,
                          node_metric = "strength", node_cmap = cm.coolwarm, edge_cmap = cm.coolwarm, scale_edge_width = True)

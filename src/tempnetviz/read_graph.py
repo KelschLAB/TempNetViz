@@ -1158,7 +1158,7 @@ if __name__ == '__main__':
     file3 = "interactions_resD1_03.csv"
     file4 = "interactions_resD1_04.csv"
     file5 = "interactions_resD1_05.csv"
-
+    
 # community clustering example. The indices provided by this can be passed to other plotting functions for display
 #     data = read_graph([path+file1], mnn = 3, return_ig=False)[0]
 #     if isSymmetric(data):
@@ -1178,14 +1178,14 @@ if __name__ == '__main__':
 #     plt.show()
 
 # ## stacked plot example     
-#     f = plt.Figure()
-#     fig, ax = plt.subplots(1, 1)
-#     ax = fig.add_subplot(111, projection='3d')
-#     display_graph([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 3, percentage_threshold = 0,
-#                   node_metric = "none", mutual = True, idx = [], node_size = 5, edge_width = 2,
-#                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
-#                   node_labels = False, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.Greens)
-#     plt.show()
+    # f = plt.Figure()
+    # fig, ax = plt.subplots(1, 1)
+    # ax = fig.add_subplot(111, projection='3d')
+    # display_graph([path+file1, path+file2, path+file3, path+file4, path+file5], ax, mnn = None, deg = 3, percentage_threshold = 0,
+    #               node_metric = "strength", mutual = True, idx = [], node_size = 5, edge_width = 2, layout = "circle",
+    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
+    #               node_labels = True, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.coolwarm)
+    # plt.show()
 
 # # histogram plot example     
 #     f = plt.Figure()
