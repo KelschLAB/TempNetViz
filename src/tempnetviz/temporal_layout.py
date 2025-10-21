@@ -159,7 +159,7 @@ def plot_temporal_layout(path_to_file, ax=None, percentage_threshold = 0.0, mnn 
         
     ax.set_yticks(range(node_number))
     if node_labels is not None:
-        ax.set_yticklabels(node_labels)  # Label each tick
+        ax.set_yticklabels([node_labels[int(idx)] for idx in order_y[::-1]])  # Label each tick
     ax.set_xticks(range(timesteps))  # Set ticks at each time step position
     ax.set_xticklabels([f'{i+1}' for i in range(timesteps)])  # Label each tick
     ax.set_xlabel('Timesteps')
