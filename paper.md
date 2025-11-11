@@ -1,5 +1,5 @@
 ---
-title: 'TempNetViz: a GUI for temporal graphs visualization'
+title: 'TempNetViz: a package for temporal graphs visualization'
 tags:
   - Python
   - Temporal graphs
@@ -41,7 +41,7 @@ Particular attention was given to usability, making data exploration as intuitiv
 TempNetViz was built using igraph and networkx, two of the most popular graph visualization packages in Python [@csardi2006igraph] [@hagberg2008exploring].
 
 # Statement of need
-To the best of our knowledge, there are currently no graphical user interfaces (GUIs) available that are designed specifically for the interactive visualization of temporal graphs. 
+To the best of our knowledge, there are currently no interfaces available that are designed specifically for the interactive visualization of temporal graphs. 
 Although some established graph visualization tools provide options for displaying temporal networks [@bastian2009gephi] [@shannon2003cytoscape], they were not tailored for this purpose. 
 Their features are limited, often relying on specialized internal data formats or external plugins. 
 As a result, researchers face a substantial learning barrier that must be overcome before meaningful analysis can be conducted. Moreover, this also makes systematic comparison across different data representations difficult.
