@@ -481,6 +481,9 @@ def display_graph(path_to_file, ax, percentage_threshold = 0.0, mnn = None, avg_
     else:
         edge_cmap = cm.Greys
         
+    if type(path_to_file) == str:
+        path_to_file = [path_to_file]
+        
     if len(path_to_file) > 1 and not avg_graph:
         if "node_cmap" in kwargs:
             node_cmap = kwargs["node_cmap"]
