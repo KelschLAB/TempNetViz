@@ -1,0 +1,2 @@
+The authors would like to thank Paul Brodersen for his detailed NetworkX implementation of multi-layer graphs, onto which the 3D view function of this package is based on.
+We also want to mention Petter Holme and Jari Saramäki's book "Temporal Network Theory", whose chapters on temporal graph layouts and analysis helped shape this project.
