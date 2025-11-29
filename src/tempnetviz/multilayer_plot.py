@@ -1,5 +1,7 @@
 """
 Plot multi-graphs in 3D.
+Author: Paul Brodersen, Feb 26 2020
+Modified by: Corentin Nelias, November 2024
 """
 import numpy as np
 import matplotlib.pyplot as plt
