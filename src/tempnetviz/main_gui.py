@@ -27,9 +27,8 @@ from tempnetviz.tooltip import ToolTip
 from tempnetviz.temporal_layout import plot_temporal_layout
 
 #To-do: 
-#       - put layout button in settings? It is actually not super necessary to have it in main app.
 #       - closeness sometimes crashes after graph cut. Let the user know with a pop-up!
-#       - grey out 'layout' button when temporal layout is active
+#       - grey out 'Clustering' button when histogram or timeseries is active
 # now, when showing animation with GUI, it creates a separate plot. fix that.
 
 ###### For future versions: 
@@ -58,7 +57,7 @@ class App:
         # variables that can change after interacting with the buttons
         self.dirpath = None
         self.path_to_file = None
-        self.layout_style = "fr"
+        self.layout_style = "circle"
         self.node_metric = "none"
         self.percentage_threshold = 0.0
         self.mnn_number = None
@@ -96,10 +95,10 @@ class App:
         menu_frame.place(relx=0, rely=0, relwidth=0.22, relheight=0.2)
         
         btn_frame = tk.Frame(root, bg = self.color2, highlightbackground="gray", highlightthickness=1) #main buttons frame
-        btn_frame.place(relx=0, rely=0.2, relwidth=0.22, relheight=0.65)
+        btn_frame.place(relx=0, rely=0.2, relwidth=0.22, relheight=0.5)
         
         result_display_frame = tk.Frame(root, bg = self.color3, highlightbackground="gray", highlightthickness=1) #result display frame
-        result_display_frame.place(relx=0, rely=0.78, relwidth=0.22, relheight=0.22)
+        result_display_frame.place(relx=0, rely=0.65, relwidth=0.22, relheight=0.37)
 
         self.content_frame = tk.Frame(root) # content frame, for plotting and stats
         self.content_frame.place(relx=0.22, rely=0.1, relwidth=0.78, relheight=0.8)
@@ -125,42 +124,32 @@ class App:
         origin, distance_between = 0.15, 0.15
         padx, pady, font = 0, 30, '5'
         graph_selector_label = tk.Label(btn_frame, text = "Sub-graph:", bg = self.color2)
-        graph_selector_label.place(relx= 0.07, rely = origin, relwidth=0.25, relheight=0.08)
+        graph_selector_label.place(relx= 0.07, rely = origin, relwidth=0.25, relheight=0.12)
         
         # Graph file(s) selection menu
         self.graph_selector = MultiSelectDropdown(btn_frame, [], 
             button_text="Select graph file(s)", apply_callback=self.get_checked)
-        self.graph_selector.button.place(relx=0.34, rely=origin, relwidth=0.57, relheight=0.08)
+        self.graph_selector.button.place(relx=0.34, rely=origin, relwidth=0.57, relheight=0.12)
         self.path_variable_list = [] # storing the menu options here
         self.path_label_list = []
         self.active_path_list = [] # storing selected paths here
 
-        # layout selection
-        layout_label = tk.Label(btn_frame, text = "Layout: ", bg = self.color2)
-        layout_label.place(relx=0.12, rely = origin+distance_between, relheight=0.06)
-        layout_list = ["circle", "drl", "fr", "kk", "large", "random", "tree"]
-        self.plot_selector=ttk.Combobox(btn_frame, values = layout_list, state = "readonly")
-        self.plot_selector.place(relx=0.35, rely = origin+distance_between, relheight=0.06)
-        self.plot_selector.set("Graph layout")
-        self.plot_selector.bind('<<ComboboxSelected>>', self.plot_changed)
-        self.plot_selector_tooltip = ToolTip(self.plot_selector, "Click here to change the spatial organization\n of the nodes within the graph.", 700)
-
         # metric selection for nodes
         metric_label = tk.Label(btn_frame, text = "Metric: ", bg = self.color2)
-        metric_label.place(relx=0.12, rely = origin+2*distance_between, relheight=0.06)
+        metric_label.place(relx=0.12, rely = 0.35, relheight=0.09)
         metric_values = ["none", "strength", "betweenness", "closeness", "eigenvector centrality", "page rank", "hub score", "authority score", "rich-club", "k-core"]
         self.node_metric_selector=ttk.Combobox(btn_frame, values = metric_values, state = "readonly")
-        self.node_metric_selector.place(relx=0.35, rely = origin+2*distance_between, relheight=0.06)
+        self.node_metric_selector.place(relx=0.35, rely = 0.35, relheight=0.09)
         self.node_metric_selector.set("Node metric")
         self.node_metric_selector.bind('<<ComboboxSelected>>', self.node_changed)
         self.node_metric_selector_tp = ToolTip(self.node_metric_selector, "The node metrics are different measurements of the importance\n of the nodes within the graph", 700)
 
         # Graph-cut type selection
         graphcut_label = tk.Label(btn_frame, text = "Graph cut: ", bg = self.color2)
-        graphcut_label.place(relx=0.05, rely = origin+3*distance_between, relheight=0.06)
+        graphcut_label.place(relx=0.05, rely = 0.53, relheight=0.09)
         graphcut_values = ["none", "threshold", "mutual nearest neighbors", "nearest neighbors"]
         self.graphcut_selector=ttk.Combobox(btn_frame, values = graphcut_values, state = "readonly")
-        self.graphcut_selector.place(relx=0.35, rely = origin+3*distance_between, relheight=0.06)
+        self.graphcut_selector.place(relx=0.35, rely = 0.53, relheight=0.09)
         self.graphcut_selector.set("Graph-cut type")
         self.graphcut_selector.bind('<<ComboboxSelected>>', self.graphcut_param_window)
         self.graphcut_tooltip = ToolTip(self.graphcut_selector, "Click here to prune the edges of the graph(s). Threshold will remove weak edges,\nwhile nearest neighbors based cut only keeps edges between nodes that are functionaly close.", 700)
@@ -168,24 +157,28 @@ class App:
         # Button to open clustering window
         self.cluster_button = tk.Button(btn_frame)
         self.cluster_button["text"] = "cluster nodes"
-        self.cluster_button.place(relx=0.2, rely = origin+4*distance_between, relwidth= 0.6, relheight=0.1)
+        self.cluster_button.place(relx=0.2, rely = 0.7, relwidth= 0.6, relheight=0.1)
         self.cluster_button["command"] = self.cluster_button_command
-        self.cluster_button_tooltip = ToolTip(self.cluster_button, "Click here to detect communities in the graph(s).\n Nodes that are similar will be colored the same", 700)
+        self.cluster_button_tooltip = ToolTip(self.cluster_button, "Click here to detect communities in the graph(s).\n Nodes that are similar will be colored the same\n \
+                                              this options is only relevant for graph, temporal layout or animation types of display", 700)
 
         # Display type buttons (plot, stats, animation)
-        tk.Label(result_display_frame, text="Display type", font = 'Helvetica 12 bold', bg =  self.color3).place(relx = 0.1, rely = 0.1, relwidth=0.8, relheight=0.2)
+        tk.Label(result_display_frame, text="Display type", font = 'Helvetica 12 bold', bg =  self.color3).place(relx = 0.1, rely = 0.025, relwidth=0.8, relheight=0.2)
         self.plot_btn = tk.Button(result_display_frame, text='Multi-layer')
-        self.plot_btn.place(relx = 0.1, rely = 0.4, relwidth=0.38, relheight=0.2)
+        self.plot_btn.place(relx = 0.08, rely = 0.25, relwidth=0.39, relheight=0.17)
         self.plot_btn["command"] = self.plot_clicked
         self.stats_btn = tk.Button(result_display_frame, text='Histogram')
-        self.stats_btn.place(relx = 0.5, rely = 0.4, relwidth=0.39, relheight=0.2)
+        self.stats_btn.place(relx = 0.52, rely = 0.25, relwidth=0.39, relheight=0.17)
         self.stats_btn["command"] = self.stats_clicked
-        self.anim_btn = tk.Button(result_display_frame, text='Animation')
-        self.anim_btn.place(relx = 0.1, rely = 0.65, relwidth=0.39, relheight=0.2)
-        self.anim_btn["command"] = self.animation_clicked
+        self.timeseries_btn = tk.Button(result_display_frame, text='Timeseries')
+        self.timeseries_btn.place(relx = 0.08, rely = 0.48, relwidth=0.39, relheight=0.17)
+        self.timeseries_btn["command"] = self.timeseries_clicked
         self.tl_btn = tk.Button(result_display_frame, text='Temp. layout')
-        self.tl_btn.place(relx = 0.5, rely = 0.65, relwidth=0.39, relheight=0.2)
+        self.tl_btn.place(relx = 0.52, rely = 0.48, relwidth=0.39, relheight=0.17)
         self.tl_btn["command"] = self.templayout_clicked
+        self.anim_btn = tk.Button(result_display_frame, text='Animation')
+        self.anim_btn.place(relx = 0.25, rely = 0.72, relwidth=0.5, relheight=0.17)
+        self.anim_btn["command"] = self.animation_clicked
         self.plot_btn.config(bg="#d1d1d1")
         self.stats_btn.config(bg="#f0f0f0")
         self.anim_btn.config(bg="#f0f0f0")
@@ -198,7 +191,7 @@ class App:
         txt += "      You can select files by dragging the mouse, or by holding ctrl and clicking.\n\n"
         txt += "3. Choose a metric to highlight relevant features of the data. If you are working with \n"
         txt += "      large graphs, apply a graph cut to remove weak edges and improve visibility.\n\n"
-        txt += "4. You can switch the result display with the 'multi-layer', 'statistics',\n 'animation' and 'Temp. layout' buttons"
+        txt += "4. You can switch the result display with the 'multi-layer', 'statistics',\n 'timeseries', 'Temp. layout' and 'Animation' buttons"
         self.label = tk.Label(self.content_frame, font = 'Helvetica 13 bold', 
                               text = txt)
         self.label.place(relx=0.1, rely=0.2, relwidth=0.8, relheight=0.5)
@@ -351,6 +344,39 @@ class App:
         NavigationToolbar2Tk(canvas, self.content_frame)
         canvas.draw()
         canvas.get_tk_widget().pack()#fill=tk.BOTH, expand=True, side="top") 
+        
+    def timeseries_in_frame(self):
+        if len(self.active_path_list) == 0:
+            return
+        for fm in self.content_frame.winfo_children():
+            fm.destroy()
+            root.update()
+            
+        # Show temporary "Loading..." label before plotting
+        self.label = ttk.Label(self.content_frame, text="Rendering graph...", font = 'Helvetica 20 bold')
+        self.label.place(relx=0.3, rely=0.2, relwidth=0.8, relheight=0.4)
+        self.content_frame.update()
+                
+        px = 1/plt.rcParams['figure.dpi']  # pixel in inches
+        f = Figure(figsize=(800*px,400*px), dpi = 100)
+        a = f.add_subplot(111)
+                       
+        display_graph_timeseries(self.path_to_file, a, percentage_threshold = self.percentage_threshold, mnn = self.mnn_number, mutual = self.mutual, \
+                      avg_graph = self.view_type == "avg", affinity = self.edge_type == "affinity",  rm_fb_loops = self.remove_loops, \
+                      layout = self.layout_style, node_metric = self.node_metric, rm_index = self.rm_index, \
+                      idx = self.idx, cluster_num = self.cluster_num, layer_labels=self.path_to_file, deg = self.degree,
+                      edge_width = int(self.edge_thickness_var.get()), node_size = int(self.node_thickness_var.get()), 
+                      scale_edge_width = self.scale_edge_width, between_layer_edges = self.between_layer_edges,
+                      node_labels = self.show_node_lb, show_planes = self.show_planes, edge_cmap = self.edge_cmap, 
+                      node_cmap = self.node_cmap)
+            
+        f.subplots_adjust(left=0, bottom=0, right=0.948, top=1, wspace=0, hspace=0)
+
+        canvas = FigureCanvasTkAgg(f, master=self.content_frame)
+        NavigationToolbar2Tk(canvas, self.content_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack()#fill=tk.BOTH, expand=True, side="top") 
+        self.label.destroy()
        
     def animation_in_frame(self):
         if len(self.active_path_list) == 0:
@@ -504,6 +530,8 @@ class App:
             self.animation_in_frame()
         elif self.display_type == "temporal layout":
             self.templayout_in_frame()
+        elif self.display_type == "timeseries":
+            self.timeseries_in_frame()
             
     def plot_clicked(self):
         self.display_type = "plot"
@@ -512,6 +540,15 @@ class App:
         self.stats_btn.config(bg="#f0f0f0")
         self.anim_btn.config(bg="#f0f0f0")
         self.tl_btn.config(bg="#f0f0f0")
+        
+    def timeseries_clicked(self):
+        self.display_type = "timeseries"
+        self.timeseries_in_frame()
+        self.plot_btn.config(bg="#f0f0f0")
+        self.stats_btn.config(bg="#f0f0f0")
+        self.anim_btn.config(bg="#f0f0f0")
+        self.timeseries_btn.config(bg="#d1d1d1")
+        self.tl_btn.config(bg="#f0f0f0")
 
     def stats_clicked(self):
         self.display_type = "stats"
@@ -519,6 +556,7 @@ class App:
         self.plot_btn.config(bg="#f0f0f0")
         self.stats_btn.config(bg="#d1d1d1")
         self.anim_btn.config(bg="#f0f0f0")
+        self.timeseries_btn.config(bg="#f0f0f0")
         self.tl_btn.config(bg="#f0f0f0")
 
     def animation_clicked(self):
@@ -528,6 +566,7 @@ class App:
         self.stats_btn.config(bg="#f0f0f0")
         self.anim_btn.config(bg="#d1d1d1")
         self.tl_btn.config(bg="#f0f0f0")
+        self.timeseries_btn.config(bg="#f0f0f0")
 
     def templayout_clicked(self):
         self.display_type = "temporal layout"
@@ -536,11 +575,7 @@ class App:
         self.stats_btn.config(bg="#f0f0f0")
         self.anim_btn.config(bg="#f0f0f0")
         self.tl_btn.config(bg="#d1d1d1")
-
-    # layout type changed
-    def plot_changed(self, event):
-        self.layout_style = self.plot_selector.get()
-        self.refresh_plot()
+        self.timeseries_btn.config(bg="#f0f0f0")
 
     def rich_club_window(self):
         self.new_window = tk.Toplevel(root)

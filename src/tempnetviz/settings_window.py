@@ -25,11 +25,13 @@ class settingsWindow(tk.Toplevel):
         tab2 = ttk.Frame(self.tabControl)
         tab3 = ttk.Frame(self.tabControl)
         tab4 = ttk.Frame(self.tabControl)
-        
+        tab5 = ttk.Frame(self.tabControl)
+
         self.tabControl.add(tab1, text ='General')
         self.tabControl.add(tab2, text ='Graph Plot')
         self.tabControl.add(tab3, text ='Histogram')
         self.tabControl.add(tab4, text ='Animation')
+        self.tabControl.add(tab5, text = 'Timeseries')
         self.tabControl.pack(expand = 1, fill ="both")
         
         self.edge_type_var = tk.IntVar(value = 1) # variable for changing affinity/distance in settings window
@@ -174,6 +176,23 @@ class settingsWindow(tk.Toplevel):
         if self.app.show_planes:
             show_planes_button.select()
         show_planes_button.grid(row = 2, column = 2)
+        
+        between_layer_label = tk.Label(tab2, text="Draw edges between layers: ")
+        between_layer_label.grid(row = 3, column = 1)
+        between_layer_button = tk.Checkbutton(tab2, text="", command = self.between_layer_clicked)
+        if self.app.between_layer_edges:
+            between_layer_button.select()
+        between_layer_button.grid(row = 3, column = 2)
+        
+        # layout selection
+        layout_label = tk.Label(tab2, text = "Layout: ")
+        layout_label.grid(row = 4, column = 1)
+        layout_list = ["circle", "drl", "fr", "kk", "large", "random", "tree"]
+        self.plot_selector=ttk.Combobox(tab2, values = layout_list, state = "readonly")
+        self.plot_selector.grid(row = 4, column = 2)
+        self.plot_selector.set("Graph layout")
+        self.plot_selector.bind('<<ComboboxSelected>>', self.layout_changed)
+        self.plot_selector_tooltip = ToolTip(self.plot_selector, "Click here to change the spatial organization\n of the nodes within the graph.", 700)
 
 ## 3rd tab: histogram options
         multilayer_label = tk.Label(tab3, text="Histogram type")
@@ -217,12 +236,7 @@ class settingsWindow(tk.Toplevel):
         self.animation_speed_entry.bind('<Return>', lambda event: self.on_enter_pressed(event))
         self.animation_speed_entry.grid(row=1, column=2)
         
-        between_layer_label = tk.Label(tab2, text="Draw edges between layers: ")
-        between_layer_label.grid(row = 8, column = 1)
-        between_layer_button = tk.Checkbutton(tab2, text="", command = self.between_layer_clicked)
-        if self.app.between_layer_edges:
-            between_layer_button.select()
-        between_layer_button.grid(row = 8, column = 2)
+
         
 ## Callbacks
     def redraw(self):
@@ -234,6 +248,8 @@ class settingsWindow(tk.Toplevel):
             self.app.animation_in_frame()
         elif self.app.display_type == "temporal layout":
             self.app.templayout_in_frame()
+        elif self.app.display_type == "timeseries":
+            self.app.timeseries_in_frame()
 
     def on_enter_pressed(self, event):
         edge_thickness_value = self.edge_thickness_entry.get()  
@@ -263,6 +279,10 @@ class settingsWindow(tk.Toplevel):
             self.redraw()
             return
         
+    def layout_changed(self, event):
+        self.app.layout_style = self.plot_selector.get()
+        self.redraw()
+        
     def algo_changed(self, event):
         self.app.community_algorithm = self.community_algo_selector.get()
         self.app.cluster_button_command()
@@ -277,7 +297,6 @@ class settingsWindow(tk.Toplevel):
     def edge_cmap_changed(self, event):
         self.app.edge_cmap = matplotlib.colormaps.get_cmap(self.edge_cmap_selector.get())
         self.redraw()    
-
 
     def switch_view_type(self):
         if self.app.view_type == "3D":

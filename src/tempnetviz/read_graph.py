@@ -151,6 +151,8 @@ def read_graph(path_to_file, percentage_threshold = 0.01, mnn = None, return_ig 
         data = []
         for i in range(len(path_to_file)):
             arr = np.loadtxt(path_to_file[i], delimiter=",", dtype=str)
+            if start_idx == 1:
+                arr[0, 0] = "ID"
             layer_data = arr[start_idx:, start_idx:].astype(float)
             if not affinity: # if graph edges represent distances and not affinities, need to invert values
                layer_data = inverse(layer_data, rm_fb_loops)
@@ -1152,15 +1154,143 @@ def display_animation(path_to_file, parent_frame = None, percentage_threshold = 
         return f, ax
     else:
         return animation
+    
+    
+def display_graph_timeseries(path_to_file, ax, percentage_threshold = 0.0, mnn = None, affinity = True,
+                     rm_fb_loops = True, mutual = True, rm_index = True, node_metric = "strength", **kwargs):
+    """
+    This function displays the temporal graph to analyze as a timeseries, where each node is represented by
+    the evolution of its metric values as a function of time
+
+    Parameters
+    ----------
+    path_to_file : string
+        path specifying where the file containing the matrix representing the graph 
+        is stored. Should be a .csv file.
+    ax : matplotlib.axis
+        the axis to plot the graph onto.
+    threshold : parameter specifying the edge value threshold under which edges are not displayed.
+    mnn : number of nearest neighbours for graph cut
+    affinity: Whether the edges represent an affinity measurement (if True) or a distance (if False) (i.e. high value = high similarity or 
+        high value = high difference). Defaults to True.
+    rm_fb_loops: Bool. Whether or not to remove feedback loops from graph display
+    **kwargs : strings
+        layout : specifies which layout to use for displaying the graph. see igraph documentation for 
+            a detailed list of all layout. should be given as a string as stated in the igraph doc.
+        node_metric : specifies which metric to use in order to color and size the vertices of the graph.
+            allowed values: ["strength", "betweenness", "closeness", "eigenvector centrality", "page rank", "hub score", "authority score"]
+
+    Returns
+    -------
+    None.
+    """
+
+    # for igrpah based metrics
+    layers = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=True, affinity = affinity,
+                        rm_fb_loops = rm_fb_loops, mutual = mutual, rm_index = rm_index) 
+    # rc and kcores are computed from numpy arrays
+    layers_data = read_graph(path_to_file, percentage_threshold = percentage_threshold, mnn = mnn, return_ig=False,
+                             affinity = affinity, rm_fb_loops = rm_fb_loops, mutual = mutual, rm_index = rm_index)
+
+    default_node_size = 1 
+    if node_metric == "none":
+        return
+            
+    elif node_metric == "betweenness":
+        node_size = []
+        for g in layers:
+            edge_betweenness = g.betweenness(weights = [1/(e['weight']) for e in g.es()]) #taking the inverse of edge values as we want high score to represent low distances
+            edge_betweenness = ig.rescale(edge_betweenness)
+            node_size.append(np.array(edge_betweenness)*default_node_size+0.07)
+            
+    elif node_metric == "strength":
+        node_size = []
+        for g in layers:
+            edge_strength = g.strength(weights = [e['weight'] for e in g.es()])
+            edge_strength = ig.rescale(edge_strength)
+            node_size.append(np.array(edge_strength)*default_node_size+0.07)
+            
+    elif node_metric == "closeness":
+        node_size = []
+        for g in layers:
+            edge_closeness = g.closeness(weights = [1/(e['weight']) for e in g.es()]) #taking the inverse of edge values as we want high score to represent low distances
+            edge_closeness = ig.rescale(edge_closeness)
+            node_size.append(np.array(edge_closeness)*default_node_size+0.07)
+            
+    elif node_metric == "hub score":
+        node_size = []
+        for g in layers:
+            edge_hub = g.hub_score(weights = [e['weight'] for e in g.es()])
+            edge_hub = ig.rescale(edge_hub)
+            node_size.append(np.array(edge_hub)*default_node_size+0.07)
+            
+    elif node_metric == "authority score":
+        node_size = []
+        for g in layers:
+            edge_authority = g.authority_score(weights = [e['weight'] for e in g.es()])
+            edge_authority = ig.rescale(edge_authority)
+            node_size.append(np.array(edge_authority)*default_node_size+0.07)
+            
+    elif node_metric == "eigenvector centrality":
+        node_size = []
+        for g in layers:
+            edge_evc = g.eigenvector_centrality(weights = [e['weight'] for e in g.es()])
+            edge_evc = ig.rescale(edge_evc)
+            node_size.append(np.array(edge_evc)*default_node_size+0.07)
+            
+    elif node_metric == "page rank":
+        node_size = []
+        for g in layers:
+            edge_pagerank = g.personalized_pagerank(weights = [e['weight'] for e in g.es()])
+            edge_pagerank = ig.rescale(edge_pagerank)
+            node_size.append(np.array(edge_pagerank)*default_node_size+0.07)
+            
+    elif node_metric == "rich-club":
+        node_size = []
+        for g in layers:
+            k_degree = kwargs["deg"]
+            size = rich_club_weights(g, k_degree, 0.01)
+            node_size.append(np.array([n*default_node_size for n in size]))
+            
+    elif node_metric == "k-core":
+        node_size = []
+        for d in layers_data:
+            k_degree = kwargs["deg"]
+            size = k_core_weights(d, k_degree, 0.01)
+            node_size.append(np.array([n*default_node_size for n in size]))
+    
+    if rm_index == True and ("node_labels" in kwargs and kwargs["node_labels"]):
+        node_labels = read_labels(path_to_file)
+    else:
+        node_labels = ["" for i in range(len(read_labels(path_to_file)))]
+        
+    node_size = np.array(node_size)
+    for node in range(node_size.shape[1]):
+        ax.plot(node_size[:, node], label = node_labels[node], alpha = 0.8)
+        ax.set_ylabel(node_metric)
+        ax.set_xlabel("timestep")
+    ax.legend(fontsize = 7)
 
 if __name__ == '__main__':
 
-    path = "..\\..\\data\\nosemaze\\both_cohorts_1days\\G10\\"
-    file1 = "interactions_resD1_01.csv"
-    file2 = "interactions_resD1_02.csv"
-    file3 = "interactions_resD1_03.csv"
-    file4 = "interactions_resD1_04.csv"
-    file5 = "interactions_resD1_05.csv"
+    # path = "..\\..\\data\\nosemaze\\both_cohorts_1days\\G10\\"
+    # file1 = "interactions_resD1_01.csv"
+    # file2 = "interactions_resD1_02.csv"
+    # file3 = "interactions_resD1_03.csv"
+    # file4 = "interactions_resD1_04.csv"
+    # file5 = "interactions_resD1_05.csv"
+    
+    path = "C:\\Users\\corentin.nelias\\Documents\\GitHub\\Vareniclin\\data\\G1\\hourly_matrices\\interactions\\"
+    file = "interactions_h0.csv"
+    paths = [path + f"interactions_h{h}.csv" for h in range(300)]
+    
+    f = plt.Figure()
+    fig, ax = plt.subplots(1, 1)
+    display_graph_timeseries(paths, ax, mnn = None, deg = 0, percentage_threshold = 0,
+                  node_metric = "hub score", mutual = True, idx = [], node_size = 5, edge_width = 2, layout = "circle",
+                  scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
+                  node_labels = True, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.coolwarm)
+    plt.show()
     
 # community clustering example. The indices provided by this can be passed to other plotting functions for display
 #     data = read_graph([path+file1], mnn = 3, return_ig=False)[0]
