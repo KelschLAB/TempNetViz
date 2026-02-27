@@ -1194,55 +1194,60 @@ def display_graph_timeseries(path_to_file, ax, percentage_threshold = 0.0, mnn =
 
     default_node_size = 1 
     if node_metric == "none":
+        ax.text(0.5, 0.5, 'Please select a metric',
+             horizontalalignment='center',
+             verticalalignment='center',
+             transform = ax.transAxes)
+        ax.set_axis_off()
         return
             
     elif node_metric == "betweenness":
         node_size = []
         for g in layers:
             edge_betweenness = g.betweenness(weights = [1/(e['weight']) for e in g.es()]) #taking the inverse of edge values as we want high score to represent low distances
-            edge_betweenness = ig.rescale(edge_betweenness)
+            # edge_betweenness = ig.rescale(edge_betweenness)
             node_size.append(np.array(edge_betweenness)*default_node_size+0.07)
             
     elif node_metric == "strength":
         node_size = []
         for g in layers:
             edge_strength = g.strength(weights = [e['weight'] for e in g.es()])
-            edge_strength = ig.rescale(edge_strength)
+            # edge_strength = ig.rescale(edge_strength)
             node_size.append(np.array(edge_strength)*default_node_size+0.07)
             
     elif node_metric == "closeness":
         node_size = []
         for g in layers:
             edge_closeness = g.closeness(weights = [1/(e['weight']) for e in g.es()]) #taking the inverse of edge values as we want high score to represent low distances
-            edge_closeness = ig.rescale(edge_closeness)
+            # edge_closeness = ig.rescale(edge_closeness)
             node_size.append(np.array(edge_closeness)*default_node_size+0.07)
             
     elif node_metric == "hub score":
         node_size = []
         for g in layers:
             edge_hub = g.hub_score(weights = [e['weight'] for e in g.es()])
-            edge_hub = ig.rescale(edge_hub)
+            # edge_hub = ig.rescale(edge_hub)
             node_size.append(np.array(edge_hub)*default_node_size+0.07)
             
     elif node_metric == "authority score":
         node_size = []
         for g in layers:
             edge_authority = g.authority_score(weights = [e['weight'] for e in g.es()])
-            edge_authority = ig.rescale(edge_authority)
+            # edge_authority = ig.rescale(edge_authority)
             node_size.append(np.array(edge_authority)*default_node_size+0.07)
             
     elif node_metric == "eigenvector centrality":
         node_size = []
         for g in layers:
             edge_evc = g.eigenvector_centrality(weights = [e['weight'] for e in g.es()])
-            edge_evc = ig.rescale(edge_evc)
+            # edge_evc = ig.rescale(edge_evc)
             node_size.append(np.array(edge_evc)*default_node_size+0.07)
             
     elif node_metric == "page rank":
         node_size = []
         for g in layers:
             edge_pagerank = g.personalized_pagerank(weights = [e['weight'] for e in g.es()])
-            edge_pagerank = ig.rescale(edge_pagerank)
+            # edge_pagerank = ig.rescale(edge_pagerank)
             node_size.append(np.array(edge_pagerank)*default_node_size+0.07)
             
     elif node_metric == "rich-club":
@@ -1265,8 +1270,14 @@ def display_graph_timeseries(path_to_file, ax, percentage_threshold = 0.0, mnn =
         node_labels = ["" for i in range(len(read_labels(path_to_file)))]
         
     node_size = np.array(node_size)
+    linestyles = ['-', '--', '-.', ':', (0, (3, 1, 1, 1)), (0, (5, 10))]
     for node in range(node_size.shape[1]):
-        ax.plot(node_size[:, node], label = node_labels[node], alpha = 0.8)
+        current_style = linestyles[node % len(linestyles)]
+        if kwargs["node_label_filter"] is None:
+            ax.plot(node_size[:, node], label = node_labels[node], ls = current_style, alpha = 0.8)
+        elif "node_label_filter" in kwargs and node_labels[node] in kwargs["node_label_filter"]:
+            ax.plot(node_size[:, node], label = node_labels[node], ls = current_style, alpha = 0.8)
+        
         ax.set_ylabel(node_metric)
         ax.set_xlabel("timestep")
     ax.legend(fontsize = 7)
@@ -1282,15 +1293,24 @@ if __name__ == '__main__':
     
     path = "C:\\Users\\corentin.nelias\\Documents\\GitHub\\Vareniclin\\data\\G1\\hourly_matrices\\interactions\\"
     file = "interactions_h0.csv"
-    paths = [path + f"interactions_h{h}.csv" for h in range(300)]
+    paths = [path + f"interactions_h{h:03}.csv" for h in range(10)]
     
     f = plt.Figure()
     fig, ax = plt.subplots(1, 1)
     display_graph_timeseries(paths, ax, mnn = None, deg = 0, percentage_threshold = 0,
                   node_metric = "hub score", mutual = True, idx = [], node_size = 5, edge_width = 2, layout = "circle",
                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
-                  node_labels = True, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.coolwarm)
+                  node_labels = True, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.coolwarm,
+                  node_label_filter = "0007CFD05D")
     plt.show()
+    
+    # fig, ax = plt.subplots(1, 1)
+    # ax = fig.add_subplot(111, projection='3d')
+    # display_graph(paths, ax, mnn = None, deg = 3, percentage_threshold = 0,
+    #               node_metric = "strength", mutual = True, idx = [], node_size = 5, edge_width = 2, layout = "circle",
+    #               scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
+    #               node_labels = True, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.coolwarm, )
+    # plt.show()
     
 # community clustering example. The indices provided by this can be passed to other plotting functions for display
 #     data = read_graph([path+file1], mnn = 3, return_ig=False)[0]

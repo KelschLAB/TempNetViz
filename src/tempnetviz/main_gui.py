@@ -352,13 +352,46 @@ class App:
             fm.destroy()
             root.update()
             
+        # node selection menu and dedicated frame
+        self.ts_toolbar = tk.Frame(self.content_frame, padx=400)
+        self.ts_toolbar.pack(side="top", fill="x")
+        if self.rm_index:
+            sample_df = pd.read_csv(self.path_to_file[0], index_col=0, nrows=0)
+            node_names = sample_df.columns.tolist()[1:]
+        else:
+            sample_df = pd.read_csv(self.path_to_file[0], index_col=0, nrows=0)
+            node_names = [str(i) for i in range(len(sample_df.columns))]
+        self.ts_node_selector = MultiSelectDropdown(
+            self.ts_toolbar, 
+            node_names, 
+            button_text="Nodes to display", 
+            apply_callback=self.refresh_timeseries_plot
+        )
+        self.ts_node_selector.button.pack(side="left", padx=10)
+        
+        # frame for plotting the timeseries
+        self.ts_frame = tk.Frame(self.content_frame)
+        self.ts_frame.pack(side="top", fill="both", expand=True)
+        
+        self.refresh_timeseries_plot()
+                
+    def refresh_timeseries_plot(self):
+        for widget in self.ts_frame.winfo_children():
+            widget.destroy()
+
+        # Get selected node names from the dropdown
+        selected_indices = self.ts_node_selector.listbox.curselection()
+        selected_nodes = [self.ts_node_selector.listbox.get(i) for i in selected_indices]
+        if not selected_nodes: # If nothing is selected, default to all nodes
+            selected_nodes = None # function plot all when None is passed
+            
         # Show temporary "Loading..." label before plotting
-        self.label = ttk.Label(self.content_frame, text="Rendering graph...", font = 'Helvetica 20 bold')
+        self.label = ttk.Label(self.ts_frame, text="Rendering graph...", font = 'Helvetica 20 bold')
         self.label.place(relx=0.3, rely=0.2, relwidth=0.8, relheight=0.4)
         self.content_frame.update()
                 
         px = 1/plt.rcParams['figure.dpi']  # pixel in inches
-        f = Figure(figsize=(800*px,400*px), dpi = 100)
+        f = Figure(figsize=(950*px,500*px), dpi = 100)
         a = f.add_subplot(111)
                        
         display_graph_timeseries(self.path_to_file, a, percentage_threshold = self.percentage_threshold, mnn = self.mnn_number, mutual = self.mutual, \
@@ -368,14 +401,12 @@ class App:
                       edge_width = int(self.edge_thickness_var.get()), node_size = int(self.node_thickness_var.get()), 
                       scale_edge_width = self.scale_edge_width, between_layer_edges = self.between_layer_edges,
                       node_labels = self.show_node_lb, show_planes = self.show_planes, edge_cmap = self.edge_cmap, 
-                      node_cmap = self.node_cmap)
+                      node_cmap = self.node_cmap, node_label_filter = selected_nodes)
             
-        f.subplots_adjust(left=0, bottom=0, right=0.948, top=1, wspace=0, hspace=0)
-
-        canvas = FigureCanvasTkAgg(f, master=self.content_frame)
-        NavigationToolbar2Tk(canvas, self.content_frame)
+        canvas = FigureCanvasTkAgg(f, master=self.ts_frame)
+        NavigationToolbar2Tk(canvas, self.ts_frame)
         canvas.draw()
-        canvas.get_tk_widget().pack()#fill=tk.BOTH, expand=True, side="top") 
+        canvas.get_tk_widget().pack() 
         self.label.destroy()
        
     def animation_in_frame(self):
@@ -440,7 +471,6 @@ class App:
                 cb = f.colorbar(ScalarMappable(norm=Normalize(vmin=0, vmax=1), cmap=cm.Reds), ax=a, label="Normalized metric value", shrink = 0.3, location = 'left')
                 cb.remove()
             
-        # f.subplots_adjust(left=0, bottom=0, right=0.948, top=1, wspace=0, hspace=0)
 
         canvas = FigureCanvasTkAgg(f, master=self.content_frame)
         NavigationToolbar2Tk(canvas, self.content_frame)
@@ -540,6 +570,7 @@ class App:
         self.stats_btn.config(bg="#f0f0f0")
         self.anim_btn.config(bg="#f0f0f0")
         self.tl_btn.config(bg="#f0f0f0")
+        self.timeseries_btn.config(bg="#f0f0f0")
         
     def timeseries_clicked(self):
         self.display_type = "timeseries"

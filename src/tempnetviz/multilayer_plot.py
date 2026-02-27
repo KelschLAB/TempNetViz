@@ -124,7 +124,9 @@ class LayeredNetworkGraph(object):
         return False
         
     def rescale(self, arr, max_val = 5):
-        if len(np.unique(arr)) == 1:
+        if len(arr) == 0: #if empty array, meaning all edges are 0
+            return arr
+        elif len(np.unique(arr)) == 1:
             normalized_arr = (arr/arr[0])*max_val
         else:
             normalized_arr = (arr - np.min(arr))/(np.max(arr)-np.min(arr))
