@@ -1263,20 +1263,43 @@ def display_graph_timeseries(path_to_file, ax, percentage_threshold = 0.0, mnn =
             k_degree = kwargs["deg"]
             size = k_core_weights(d, k_degree, 0.01)
             node_size.append(np.array([n*default_node_size for n in size]))
-    
+            
+    #fetching node labels for display
     if rm_index == True and ("node_labels" in kwargs and kwargs["node_labels"]):
         node_labels = read_labels(path_to_file)
     else:
         node_labels = ["" for i in range(len(read_labels(path_to_file)))]
         
+    # fetching nodes to highlight
+    if "nodes_to_highlight" in kwargs:
+        if kwargs["nodes_to_highlight"] == ["None"] or kwargs["nodes_to_highlight"] is None:
+            nodes_to_highlight = []
+        else:
+            nodes_to_highlight = kwargs["nodes_to_highlight"]
+    else:
+        nodes_to_highlight = []
+        
+    print(nodes_to_highlight)
+                
     node_size = np.array(node_size)
     linestyles = ['-', '--', '-.', ':', (0, (3, 1, 1, 1)), (0, (5, 10))]
     for node in range(node_size.shape[1]):
         current_style = linestyles[node % len(linestyles)]
-        if kwargs["node_label_filter"] is None:
-            ax.plot(node_size[:, node], label = node_labels[node], ls = current_style, alpha = 0.8)
+        if kwargs["node_label_filter"] is None or kwargs["node_label_filter"] == ["All"]:
+            if len(nodes_to_highlight) == 0:
+                ax.plot(node_size[:, node], label = node_labels[node], ls = current_style, alpha = 0.8)
+            else:
+                c = "red" if node_labels[node] in nodes_to_highlight else "k"
+                width = 2 if node_labels[node] in nodes_to_highlight else 1
+                ax.plot(node_size[:, node], lw = width, color = c, alpha = 0.8)
+
         elif "node_label_filter" in kwargs and node_labels[node] in kwargs["node_label_filter"]:
-            ax.plot(node_size[:, node], label = node_labels[node], ls = current_style, alpha = 0.8)
+            if len(nodes_to_highlight) == 0:
+                ax.plot(node_size[:, node], label = node_labels[node], ls = current_style, alpha = 0.8)
+            else:
+                c = "red" if node_labels[node] in nodes_to_highlight else "k"
+                width = 2 if node_labels[node] in nodes_to_highlight else 1
+                ax.plot(node_size[:, node], lw = width, color = c, alpha = 0.8)
         
         ax.set_ylabel(node_metric)
         ax.set_xlabel("timestep")
@@ -1301,7 +1324,7 @@ if __name__ == '__main__':
                   node_metric = "hub score", mutual = True, idx = [], node_size = 5, edge_width = 2, layout = "circle",
                   scale_edge_width = True, between_layer_edges = False,  cluster_num = None, rm_index = True,
                   node_labels = True, show_planes = True, edge_cmap = cm.Greys, node_cmap = cm.coolwarm,
-                  node_label_filter = "0007CFD05D")
+                  node_label_filter = ["All"], nodes_to_highlight = ["0007D0FEC5"])
     plt.show()
     
     # fig, ax = plt.subplots(1, 1)

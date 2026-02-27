@@ -353,21 +353,25 @@ class App:
             root.update()
             
         # node selection menu and dedicated frame
-        self.ts_toolbar = tk.Frame(self.content_frame, padx=400)
+        self.ts_toolbar = tk.Frame(self.content_frame, padx=10)
         self.ts_toolbar.pack(side="top", fill="x")
+        node_names = ["All"]
         if self.rm_index:
             sample_df = pd.read_csv(self.path_to_file[0], index_col=0, nrows=0)
-            node_names = sample_df.columns.tolist()[1:]
+            node_names.extend(sample_df.columns.tolist()[1:])
         else:
             sample_df = pd.read_csv(self.path_to_file[0], index_col=0, nrows=0)
-            node_names = [str(i) for i in range(len(sample_df.columns))]
-        self.ts_node_selector = MultiSelectDropdown(
-            self.ts_toolbar, 
-            node_names, 
-            button_text="Nodes to display", 
-            apply_callback=self.refresh_timeseries_plot
-        )
-        self.ts_node_selector.button.pack(side="left", padx=10)
+            node_names.extend([str(i) for i in range(len(sample_df.columns))])
+        
+        #node selection button
+        self.ts_node_selector = MultiSelectDropdown(self.ts_toolbar, node_names, 
+            button_text="Nodes to display", apply_callback=self.refresh_timeseries_plot)
+        self.ts_node_selector.button.pack(side="left", padx=200)
+        
+        # node highlighter button
+        self.ts_highlight_selector = MultiSelectDropdown(self.ts_toolbar, [name if name != "All" else "None" for name in node_names], 
+            button_text="Nodes to highlight", apply_callback=self.refresh_timeseries_plot)
+        self.ts_highlight_selector.button.pack(side="left", padx=0)
         
         # frame for plotting the timeseries
         self.ts_frame = tk.Frame(self.content_frame)
@@ -385,6 +389,13 @@ class App:
         if not selected_nodes: # If nothing is selected, default to all nodes
             selected_nodes = None # function plot all when None is passed
             
+        highlighted_indices = self.ts_highlight_selector.listbox.curselection()
+        highlighted_nodes = [self.ts_highlight_selector.listbox.get(i) for i in highlighted_indices]
+        if not highlighted_nodes: # If nothing is selected, no highlighting
+            highlighted_nodes = None 
+            
+        print(highlighted_nodes)
+            
         # Show temporary "Loading..." label before plotting
         self.label = ttk.Label(self.ts_frame, text="Rendering graph...", font = 'Helvetica 20 bold')
         self.label.place(relx=0.3, rely=0.2, relwidth=0.8, relheight=0.4)
@@ -401,7 +412,7 @@ class App:
                       edge_width = int(self.edge_thickness_var.get()), node_size = int(self.node_thickness_var.get()), 
                       scale_edge_width = self.scale_edge_width, between_layer_edges = self.between_layer_edges,
                       node_labels = self.show_node_lb, show_planes = self.show_planes, edge_cmap = self.edge_cmap, 
-                      node_cmap = self.node_cmap, node_label_filter = selected_nodes)
+                      node_cmap = self.node_cmap, node_label_filter = selected_nodes, nodes_to_highlight = highlighted_nodes)
             
         canvas = FigureCanvasTkAgg(f, master=self.ts_frame)
         NavigationToolbar2Tk(canvas, self.ts_frame)
